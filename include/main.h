@@ -62,6 +62,8 @@
 extern "C" {
 #endif
 
+#define NONE -1
+
 void setArm(int position);
 void setArmBottom();
 void setArmMid();

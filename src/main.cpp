@@ -15,13 +15,15 @@
 #include "old_systems.h"
 #include "color_sort.h"
 
-// Global variables needed for arm control
-static double targetPos = 0;
-static bool armMoving = false;
-static const double armThreshold = 0.25; // Adjust as needed
+// Global variables needed for oc control
+static int ocMove = NONE;
+static const double ocThreshold = 0.25; // Adjust as needed
+static const double ocLow = 0; // position of low 
+static const double ocHigh = 180;
 
-// Task function for arm control
-void arm_control_task(void *param)
+// Task function for oc control
+// moving to high runs
+void oc_control_task(void *param)
 {
     double currentPos;
     double error;
@@ -30,32 +32,33 @@ void arm_control_task(void *param)
 
     while (true)
     {
-        if (armMoving)
+        // pid movement for low movement
+        if (ocMove == LOW)
         {
             // current position in centidegrees, convert to degrees
-            currentPos = armRot.get_angle() / 100.0;
+            currentPos = ocRot.get_angle() / 100.0;
 
             // normalize error to [-180,180]
             currentPos = currentPos - 360 * (currentPos > 240) + 360 * (currentPos < -240);
 
-            // calculate how far arm is from target
-            error = targetPos - currentPos;
+            // calculate how far oc is from target
+            error = ocLow - currentPos;
 
-            if (fabs(error) < armThreshold)
+            if (fabs(error) < ocThreshold)
             { // goal has been met
 
                 goalCount++;
                 if (goalCount > 3)
                 {
                     // reset PID for next usage
-                    armPID.reset();
+                    ocPID.reset();
 
-                    // stop arm motors in place
-                    arm_motors.move(0);
-                    arm_motors.brake();
+                    // stop oc motors in place
+                    oc_motor.move(0);
+                    oc_motor.brake();
 
                     // stop running the PID code
-                    armMoving = false;
+                    ocMove = NONE;
                     goalCount = 0;
                 }
             }
@@ -63,82 +66,61 @@ void arm_control_task(void *param)
             { // goal has not been met
                 goalCount = 0;
                 // determine how far to move based on PID
-                nextMovement = armPID.update(error);
+                nextMovement = ocPID.update(error);
 
                 // clamps movements to [-600,600]
                 nextMovement = std::clamp(nextMovement, -600.0, 600.0);
             }
 
-            // move arm motors based on PID
-            arm_motors.move_velocity(nextMovement);
+            // move oc motors based on PID
+            oc_motor.move_velocity(nextMovement);
+        }
+        // linear driving for high movement
+        else if(ocMove == HIGH){
+            error = ocHigh - ocRot.get_angle();
+
+            if(error > 0){
+                oc_motor.move(30);
+            }
+            else{
+                oc_motor.brake();
+                ocMove = NONE;
+            }
+            
         }
 
         // collect and print data involving pid on screen
-        /*
-        pros::lcd::print(6, "Arm State: %s", armMoving ? "Moving" : "Idle");
-        pros::lcd::print(3, "Arm Current Pos: %f", currentPos);
-        pros::lcd::print(4, "Arm Target Pos: %f", targetPos);
+        pros::lcd::print(6, "oc State: %s", ocMove != NONE ? "Moving" : "Idle");
+        pros::lcd::print(3, "oc Current Pos: %f", currentPos);
+        pros::lcd::print(4, "oc Target Pos: %f", ocMove != NONE ? ocMove == HIGH ? ocHigh : ocLow : -1);
         pros::lcd::print(7, "error: %f", error);
-        pros::lcd::print(5, "Arm Next Movement: %f", nextMovement);
-        */
+        pros::lcd::print(5, "oc Next Movement: %f", nextMovement);
+    
         // Add a small delay to prevent the task from hogging CPU
         pros::delay(20);
     }
 }
 
-void setArm(int position)
+void initialize_oc_position()
 {
-    // Validate input
-    if (position < 1 || position > 4)
-    {
-        return; // Invalid position
-    }
+    // Move oc down at moderate speed but low power
+    oc_motor.set_voltage_limit(4000); // Limit to 4V for gentle movement
+    oc_motor.move_velocity(-50);      // Move down at moderate speed
+    oc_motor.set_brake_mode_all(E_MOTOR_BRAKE_HOLD);
 
-    if (position == 1)
-    {
-        targetPos = 5; // Bottom position
-    }
-    else if (position == 2)
-    {
-        targetPos = 33; // Middle position
-    }
-    else if (position == 3)
-    {
-        targetPos = 134; // Top position
-    }
-    else if (position == 4)
-    {
-        targetPos = 200; // Alliance stake position
-    }
-    armMoving = true;
-}
-
-// aliases for specific positions
-void setArmBottom() { setArm(1); }
-void setArmMid() { setArm(2); }
-void setArmTop() { setArm(3); }
-void setArmAlliance() { setArm(4); }
-
-void initialize_arm_position()
-{
-    // Move arm down at moderate speed but low power
-    arm_motors.set_voltage_limit(4000); // Limit to 4V for gentle movement
-    arm_motors.move_velocity(-50);      // Move down at moderate speed
-    arm_motors.set_brake_mode_all(E_MOTOR_BRAKE_HOLD);
-
-    // Wait until arm stalls (high current, low velocity)
+    // Wait until oc stalls (high current, low velocity)
     while (true)
     {
         // Get current draw and velocity
-        double velocity = arm_motors.get_actual_velocity();
-        int current = arm_motors.get_current_draw();
+        double velocity = oc_motor.get_actual_velocity();
+        int current = oc_motor.get_current_draw();
 
         // If we detect high current (stall) and low velocity, we've hit bottom
         if (current > 1500 && std::abs(velocity) < 5)
         {
-            arm_motors.brake();
-            arm_motors.set_voltage_limit(12000); // Reset to full voltage
-            armRot.reset_position();
+            oc_motor.brake();
+            oc_motor.set_voltage_limit(12000); // Reset to full voltage
+            ocRot.reset_position();
             break;
         }
 
@@ -156,11 +138,11 @@ void initialize()
 
     clamp.set_value(HIGH);
 
-    // initialize_arm_position();
-    arm_motors.set_brake_mode_all(E_MOTOR_BRAKE_HOLD);
+    // initialize_oc_position();
+    oc_motor.set_brake_mode_all(E_MOTOR_BRAKE_HOLD);
 
-    // create arm control task
-    Task arm_task(arm_control_task, nullptr, "Arm Control Task");
+    // create oc control task
+    Task oc_task(oc_control_task, nullptr, "oc Control Task");
 
     // create color sort task
     // colorSortHandler& sorter = colorSortHandler::getInstance();
@@ -290,17 +272,6 @@ void handleIntake()
     }
 }
 
-void handleColorSort()
-{
-
-    /*if(controller.get_digital_new_press()){
-        colorSortHandler::getInstance().killSwitch();
-    }
-    else if (controller.get_digital_new_press()){
-        colorSortHandler::getInstance().swapTeam();
-    }*/
-}
-
 void handleClamp()
 {
 
@@ -329,23 +300,17 @@ void handleDoinky()
     }
 }
 
-void handleArm()
+bool returnOC = false; // if oc still needs to return
+
+void handleOC()
 {
-    if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L1))
+    if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1))
     {
-        setArmBottom();
+        ocMove = HIGH;
+        returnOC = true;
     }
-    if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L2))
-    {
-        setArmMid();
-    }
-    if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_DOWN))
-    {
-        setArmTop();
-    }
-    if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_RIGHT))
-    {
-        setArmAlliance();
+    else if(returnOC){
+        ocMove = LOW;
     }
 }
 
@@ -378,11 +343,10 @@ void opcontrol()
         {
             testAuton();
         }
-        // handleColorSort();
         handleDriveTrain();
         handleIntake();
         handleClamp();
-        handleArm();
+        handleOC();
         handleDoinky();
 
         // delay to save resources

@@ -32,7 +32,7 @@ void waitUntilClamp(int maxDist, int maxTime){
         && left_motors.get_position(0) > -maxDist){
         
         // Get the current distance from the sensor
-        int currentGoalDist = goalSens.get_distance(); 
+        int currentGoalDist = 255 - goalSens.get_proximity(); 
 
         // Determine if goal is within proximity
         bool inRange = currentGoalDist <= MAX_GOAL_DISTANCE;
@@ -61,7 +61,7 @@ void waitUntilClamp(int maxDist, int maxTime){
 bool isGoalClamped(){
 
     // if goal is detected and clamp is down
-    if(goalSens.get_distance() <= MAX_GOAL_DISTANCE && clamp.get_value() == LOW) {
+    if(255 - goalSens.get_proximity() <= MAX_GOAL_DISTANCE && clamp.get_value() == LOW) {
         return true;
     }
     else {

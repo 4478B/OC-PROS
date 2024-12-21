@@ -1,7 +1,7 @@
 {
   "py/object": "pros.conductor.project.Project",
   "py/state": {
-    "project_name": "4478B-PROS",
+    "project_name": "4478B-OC",
     "target": "v5",
     "templates": {
       "LemLib": {
@@ -299,8 +299,8 @@
     },
     "upload_options": {
       "icon": "power",
-      "description": "50 point auton!!!!!",
-      "slot": 2
+      "description": "100 point auton!!!!!",
+      "slot": 1
     },
     "use_early_access": false
   }

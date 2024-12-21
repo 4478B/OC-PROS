@@ -15,21 +15,26 @@ using namespace lemlib;
 extern MotorGroup left_motors;
 extern MotorGroup right_motors;
 extern MotorGroup all_motors;
-extern MotorGroup arm_motors;
-extern Controller controller;
+extern Motor oc_motor;
 extern Motor intake;
+
+extern Controller controller;
+
 extern adi::Port clamp;
-extern pros::Optical ringSens;
-extern pros::Distance goalSens;
 extern adi::Port doinker;
+extern adi::Port redirect;
+extern adi::Port oc_piston;
 
-extern PID armPID;
-extern PID lateralPID;
-extern PID angularPID;
+extern PID ocPID;
 
-extern Rotation armRot;
-extern Drivetrain drivetrain;
+extern Rotation ocRot;
+
+extern pros::Optical ringSens;
+extern pros::Optical goalSens;
+
 extern Imu imu;
+
+extern Drivetrain drivetrain;
 extern OdomSensors sensors;
 extern ControllerSettings lateral_controller;
 extern ControllerSettings angular_controller;
