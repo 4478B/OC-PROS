@@ -16,13 +16,15 @@
 #include "color_sort.h"
 
 // Global variables needed for oc control
-static int ocMove = NONE;
-static const double ocThreshold = 0.25; // Adjust as needed
-static const double ocLow = 0; // position of low 
-static const double ocHigh = 180;
+int ocMove = NONE;
+const double OC_GOAL_THRESHOLD = 0.25; 
+const double OC_POSITION_LOW = 90; // position of low 
+const double OC_POSITION_HIGH = -120; // position of high
+const double OC_MAX_TORQUE = 999;
+
 
 // Task function for oc control
-// moving to high runs
+// NOTE: as arm moves up, angle decreases!!
 void oc_control_task(void *param)
 {
     double currentPos;
@@ -39,22 +41,22 @@ void oc_control_task(void *param)
             currentPos = ocRot.get_angle() / 100.0;
 
             // normalize error to [-180,180]
-            currentPos = currentPos - 360 * (currentPos > 240) + 360 * (currentPos < -240);
+            //currentPos = currentPos - 360 * (currentPos > 240) + 360 * (currentPos < -240);
 
             // calculate how far oc is from target
-            error = ocLow - currentPos;
+            error = OC_POSITION_LOW - currentPos;
 
-            if (fabs(error) < ocThreshold)
+            if (fabs(error) < OC_GOAL_THRESHOLD || oc_motor.get_torque() > OC_MAX_TORQUE)
             { // goal has been met
 
                 goalCount++;
-                if (goalCount > 3)
+                if (goalCount >= 3)
                 {
                     // reset PID for next usage
                     ocPID.reset();
 
                     // stop oc motors in place
-                    oc_motor.move(0);
+                    oc_motor.set_brake_mode(E_MOTOR_BRAKE_COAST);
                     oc_motor.brake();
 
                     // stop running the PID code
@@ -68,43 +70,51 @@ void oc_control_task(void *param)
                 // determine how far to move based on PID
                 nextMovement = ocPID.update(error);
 
-                // clamps movements to [-600,600]
-                nextMovement = std::clamp(nextMovement, -600.0, 600.0);
+                // clamps movements to [-200,200] (green gearset)
+                nextMovement = std::clamp(nextMovement, -200.0, 200.0);
             }
 
             // move oc motors based on PID
-            oc_motor.move_velocity(nextMovement);
+            //oc_motor.move_velocity(nextMovement);
         }
         // linear driving for high movement
         else if(ocMove == HIGH){
-            error = ocHigh - ocRot.get_angle();
+
+            currentPos = ocRot.get_angle() / 100.0;
+            // starts out high, approaches 0
+            error = currentPos - OC_POSITION_HIGH;
 
             if(error > 0){
-                oc_motor.move(30);
+                //oc_motor.move(30);
             }
             else{
+                oc_motor.set_brake_mode(E_MOTOR_BRAKE_HOLD);
                 oc_motor.brake();
                 ocMove = NONE;
             }
             
         }
+        // in case there is drift
+        /*else if(ocMove == IDLE_LOW){
+        }*/
 
-        // collect and print data involving pid on screen
-        pros::lcd::print(6, "oc State: %s", ocMove != NONE ? "Moving" : "Idle");
-        pros::lcd::print(3, "oc Current Pos: %f", currentPos);
-        pros::lcd::print(4, "oc Target Pos: %f", ocMove != NONE ? ocMove == HIGH ? ocHigh : ocLow : -1);
+        pros::lcd::print(6, "oc State: %s", ocMove != NONE ? 
+                                                      "Moving" : "Idle");
+        pros::lcd::print(3, "oc Current Pos: %f", (double) currentPos / 100);
+        pros::lcd::print(4, "oc Target Pos: %f", ocMove != NONE ? ocMove == HIGH ? 
+                                                           OC_POSITION_HIGH : OC_POSITION_LOW : -1);
         pros::lcd::print(7, "error: %f", error);
         pros::lcd::print(5, "oc Next Movement: %f", nextMovement);
     
-        // Add a small delay to prevent the task from hogging CPU
         pros::delay(20);
     }
 }
 
+/*
 void initialize_oc_position()
 {
     // Move oc down at moderate speed but low power
-    oc_motor.set_voltage_limit(4000); // Limit to 4V for gentle movement
+    oc_motor.set_voltage_limit(10); // Limit to 4V for gentle movement
     oc_motor.move_velocity(-50);      // Move down at moderate speed
     oc_motor.set_brake_mode_all(E_MOTOR_BRAKE_HOLD);
 
@@ -126,7 +136,7 @@ void initialize_oc_position()
 
         pros::delay(20); // Small delay to prevent hogging CPU
     }
-}
+}*/
 
 // initialize function. Runs on program startup
 void initialize()
@@ -247,7 +257,7 @@ void handleDriveTrain()
     right_motors.move_velocity(rightY);
 }
 
-void handleIntake()
+void handleIntake(pros::controller_digital_e_t buttonUp, pros::controller_digital_e_t buttonDown)
 {
 
     // manual controls are overridden if color sort mechanism is active
@@ -255,12 +265,12 @@ void handleIntake()
     {
 
         // intake
-        if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R1))
+        if (controller.get_digital(buttonUp))
         {
             intake.move(127);
         }
         // outtake
-        else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
+        else if (controller.get_digital(buttonDown))
         {
             intake.move(-127);
         }
@@ -272,39 +282,31 @@ void handleIntake()
     }
 }
 
-void handleClamp()
-{
+void togglePiston(adi::Port piston, pros::controller_digital_e_t button, bool printToController = false){
+    
+    // if corresponding button is pressed
+    if(controller.get_digital_new_press(button)){
 
-    // activates on pressing B
-    if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_B))
-    {
+        // toggle piston state
+        int new_piston_state = piston.get_value() == LOW ? HIGH : LOW;
+        piston.set_value(new_piston_state);
 
-        // clamp or unclamp based on toggled variable
-
-        clamp.set_value(clamp.get_value() == LOW ? HIGH : LOW);
-
-        // print the state of the clamp on the controller screen
-        controller.print(0, 0, clamp.get_value() == LOW ? "Clamped" : "Uncl         ");
-    }
-}
-
-void handleDoinky()
-{
-
-    // activates on pressing LEFT
-    if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_LEFT))
-    {
-
-        doinker.set_value(doinker.get_value() == LOW ? HIGH : LOW);
-
+        if(printToController){
+            if(new_piston_state == LOW){
+                controller.print(0,0,"XXXXXXXXXXXXXXXXXX");
+            }
+            else {
+                controller.print(0,0,"                  ");
+            }
+        }
     }
 }
 
 bool returnOC = false; // if oc still needs to return
 
-void handleOC()
+void handleOCMotor(pros::controller_digital_e_t button)
 {
-    if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1))
+    if (controller.get_digital(button))
     {
         ocMove = HIGH;
         returnOC = true;
@@ -330,25 +332,22 @@ void handleOC()
 void opcontrol()
 {
 
-    // left_motors.set_brake_mode_all(E_MOTOR_BRAKE_COAST);
-    // right_motors.set_brake_mode_all(E_MOTOR_BRAKE_COAST);
-    chassis.setBrakeMode(pros::E_MOTOR_BRAKE_COAST);
+    all_motors.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
 
     // loop forever
     while (true)
     {
+        if (!inCompetition) { testAuton(); }
 
-        // THIS WHOLE IF STATEMENT SHOULD BE COMMENTED OUT IN COMPS
-        if (!inCompetition)
-        {
-            testAuton();
-        }
         handleDriveTrain();
-        handleIntake();
-        handleClamp();
-        handleOC();
-        handleDoinky();
-
+        handleIntake(pros::E_CONTROLLER_DIGITAL_R1,pros::E_CONTROLLER_DIGITAL_R2);
+        handleOCMotor(pros::E_CONTROLLER_DIGITAL_L1);
+        
+        togglePiston(oc_piston,pros::E_CONTROLLER_DIGITAL_L2);
+        togglePiston(clamp,pros::E_CONTROLLER_DIGITAL_B,true);
+        togglePiston(doinker,pros::E_CONTROLLER_DIGITAL_LEFT);
+        togglePiston(redirect,pros::E_CONTROLLER_DIGITAL_X);
+        
         // delay to save resources
         pros::delay(20);
     }

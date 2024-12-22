@@ -11,26 +11,25 @@
 using namespace pros;
 using namespace lemlib;
 
-// External variable declarations
+extern Controller controller;
+
 extern MotorGroup left_motors;
 extern MotorGroup right_motors;
 extern MotorGroup all_motors;
-extern Motor oc_motor;
+
 extern Motor intake;
+extern Motor oc_motor;
 
-extern Controller controller;
+extern Rotation ocRot;
+extern PID ocPID;
 
+extern adi::Port oc_piston;
 extern adi::Port clamp;
 extern adi::Port doinker;
 extern adi::Port redirect;
-extern adi::Port oc_piston;
 
-extern PID ocPID;
-
-extern Rotation ocRot;
-
-extern pros::Optical ringSens;
-extern pros::Optical goalSens;
+extern Optical ringSens;
+extern Optical goalSens;
 
 extern Imu imu;
 

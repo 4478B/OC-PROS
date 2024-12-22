@@ -63,6 +63,7 @@ extern "C" {
 #endif
 
 #define NONE -1
+#define IDLE_LOW 2
 
 void setArm(int position);
 void setArmBottom();
