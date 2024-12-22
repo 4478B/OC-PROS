@@ -18,8 +18,8 @@ PID ocPID(.7, 0, .4);
 
 adi::Port oc_piston('A', pros::E_ADI_DIGITAL_OUT);
 adi::Port clamp('B', pros::E_ADI_DIGITAL_OUT);
-adi::Port doinker('Z', pros::E_ADI_DIGITAL_OUT);
-adi::Port redirect('Z',pros::E_ADI_DIGITAL_OUT);
+adi::Port doinker('C', pros::E_ADI_DIGITAL_OUT);
+adi::Port redirect('D',pros::E_ADI_DIGITAL_OUT);
 
 Optical ringSens(0);
 Optical goalSens(0);

@@ -359,7 +359,7 @@ void opcontrol()
         togglePiston(oc_piston,pros::E_CONTROLLER_DIGITAL_L2);
         togglePiston(clamp,pros::E_CONTROLLER_DIGITAL_B,true);
         togglePiston(doinker,pros::E_CONTROLLER_DIGITAL_LEFT);
-        togglePiston(redirect,pros::E_CONTROLLER_DIGITAL_X);
+        togglePiston(redirect,pros::E_CONTROLLER_DIGITAL_DOWN);
         
         // delay to save resources
         pros::delay(20);
