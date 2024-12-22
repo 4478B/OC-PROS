@@ -17,9 +17,9 @@
 
 // Global variables needed for oc control
 int ocMove = NONE;
-const double OC_GOAL_THRESHOLD = 0.25; 
-const double OC_POSITION_LOW = 90; // position of low 
-const double OC_POSITION_HIGH = -120; // position of high
+const double OC_GOAL_THRESHOLD = 3; // one-sided degree range considered "in goal"
+const double OC_POSITION_LOW = 338; // position of low 
+const double OC_POSITION_HIGH = 110; // position of high
 const double OC_MAX_TORQUE = 999;
 
 
@@ -44,7 +44,7 @@ void oc_control_task(void *param)
             //currentPos = currentPos - 360 * (currentPos > 240) + 360 * (currentPos < -240);
 
             // calculate how far oc is from target
-            error = OC_POSITION_LOW - currentPos;
+            error = currentPos - OC_POSITION_LOW;
 
             if (fabs(error) < OC_GOAL_THRESHOLD || oc_motor.get_torque() > OC_MAX_TORQUE)
             { // goal has been met
@@ -75,7 +75,7 @@ void oc_control_task(void *param)
             }
 
             // move oc motors based on PID
-            //oc_motor.move_velocity(nextMovement);
+            oc_motor.move_velocity(nextMovement);
         }
         // linear driving for high movement
         else if(ocMove == HIGH){
@@ -85,7 +85,7 @@ void oc_control_task(void *param)
             error = currentPos - OC_POSITION_HIGH;
 
             if(error > 0){
-                //oc_motor.move(30);
+                oc_motor.move(127);
             }
             else{
                 oc_motor.set_brake_mode(E_MOTOR_BRAKE_HOLD);
@@ -94,19 +94,24 @@ void oc_control_task(void *param)
             }
             
         }
+        else if(ocMove == NONE){
+            oc_motor.brake();
+        }
         // in case there is drift
         /*else if(ocMove == IDLE_LOW){
         }*/
-
-        pros::lcd::print(6, "oc State: %s", ocMove != NONE ? 
-                                                      "Moving" : "Idle");
-        pros::lcd::print(3, "oc Current Pos: %f", (double) currentPos / 100);
+        
+        /*
+        pros::lcd::print(6, "oc State: %s", ocMove != NONE ? ocMove == HIGH ? 
+                                                           "HIGH" : "LOW" : "NONE");
+        pros::lcd::print(3, "oc Current Pos: %f", (double) currentPos);
         pros::lcd::print(4, "oc Target Pos: %f", ocMove != NONE ? ocMove == HIGH ? 
                                                            OC_POSITION_HIGH : OC_POSITION_LOW : -1);
         pros::lcd::print(7, "error: %f", error);
         pros::lcd::print(5, "oc Next Movement: %f", nextMovement);
-    
+        
         pros::delay(20);
+        */
     }
 }
 
@@ -149,7 +154,7 @@ void initialize()
     clamp.set_value(HIGH);
 
     // initialize_oc_position();
-    oc_motor.set_brake_mode_all(E_MOTOR_BRAKE_HOLD);
+    oc_motor.set_brake_mode_all(E_MOTOR_BRAKE_COAST);
 
     // create oc control task
     Task oc_task(oc_control_task, nullptr, "oc Control Task");
@@ -288,16 +293,23 @@ void togglePiston(adi::Port piston, pros::controller_digital_e_t button, bool pr
     if(controller.get_digital_new_press(button)){
 
         // toggle piston state
-        int new_piston_state = piston.get_value() == LOW ? HIGH : LOW;
+        int init_piston_state = piston.get_value();
+        int new_piston_state = init_piston_state == LOW ? HIGH : LOW;
         piston.set_value(new_piston_state);
 
-        if(printToController){
+        if(printToController){         
             if(new_piston_state == LOW){
                 controller.print(0,0,"XXXXXXXXXXXXXXXXXX");
             }
             else {
                 controller.print(0,0,"                  ");
             }
+            /*
+            // debug printing
+            pros::lcd::print(3,"initial state %f", init_piston_state);
+            pros::lcd::print(4,"new state %f", new_piston_state);
+            pros::lcd::print(5,"piston state %f", piston.get_value());
+            */
         }
     }
 }
@@ -313,6 +325,7 @@ void handleOCMotor(pros::controller_digital_e_t button)
     }
     else if(returnOC){
         ocMove = LOW;
+        returnOC = false;
     }
 }
 

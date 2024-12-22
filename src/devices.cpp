@@ -7,17 +7,17 @@ Controller controller(pros::E_CONTROLLER_MASTER);
 
 // motor definitions
 MotorGroup left_motors({-2, -4, 11}, pros::MotorGearset::blue);
-MotorGroup right_motors({3, -8, 9}, pros::MotorGearset::blue);
+MotorGroup right_motors({3, -8, 10}, pros::MotorGearset::blue);
 MotorGroup all_motors({-2,-4,-11,3,8,9},pros::MotorGearset::blue);
 
 Motor intake(1, pros::MotorGearset::blue);
-Motor oc_motor(10, pros::MotorGearset::green);
+Motor oc_motor(9, pros::MotorGearset::green);
 
 Rotation ocRot(12);
-PID ocPID(2.9, 0, 2.5);
+PID ocPID(.7, 0, .4);
 
-adi::Port oc_piston('Z', pros::E_ADI_DIGITAL_OUT);
-adi::Port clamp('Z', pros::E_ADI_DIGITAL_OUT);
+adi::Port oc_piston('A', pros::E_ADI_DIGITAL_OUT);
+adi::Port clamp('B', pros::E_ADI_DIGITAL_OUT);
 adi::Port doinker('Z', pros::E_ADI_DIGITAL_OUT);
 adi::Port redirect('Z',pros::E_ADI_DIGITAL_OUT);
 
