@@ -7,8 +7,8 @@
 // Define the AutonRoutine structure
 struct AutonRoutine {
     std::string displayName;
-    std::function<void(int)> func;
-    int parameter = 0;
+    std::function<void(bool)> func;
+    bool parameter = true;
 };
 
 // Constructor
@@ -38,31 +38,41 @@ AutonSelector::AutonSelector(const AutonRoutine* routinesArray, size_t routineCo
 
 // Method implementations
 void AutonSelector::displaySelectionBrain() {
-    if (currentSelection < 1 || currentSelection > routines.size()) {
+    if (currentSelection < 0 || currentSelection >= routines.size()) {
         pros::lcd::clear_line(4);
         pros::lcd::print(4, "Invalid selection: %i", currentSelection);
         return;
     }
     pros::lcd::clear_line(2);
-    pros::lcd::print(2, "%s",routines[currentSelection - 1].displayName.c_str());
+    pros::lcd::print(2, "%s",routines[currentSelection].displayName.c_str());
 }
 
 void AutonSelector::prevSelection() {
-    currentSelection = (currentSelection - 2 + routines.size()) % routines.size() + 1;
+    currentSelection = (currentSelection - 1) % routines.size();
 }
 
 void AutonSelector::nextSelection() {
-    currentSelection = currentSelection % routines.size() + 1;
+    currentSelection = (currentSelection + 1) % routines.size();
+}
+
+bool AutonSelector::setSelection(int newSelection) {
+    if (newSelection < 0 || newSelection >= routines.size()) {
+        currentSelection = newSelection;
+        return true;
+    }
+    else {
+        return false;
+    }
 }
 
 void AutonSelector::runSelection() {
-    if (currentSelection < 1 || currentSelection > routines.size()) {
+    if (currentSelection < 0 || currentSelection >= routines.size()) {
         pros::lcd::clear_line(4);
         pros::lcd::print(4, "Invalid selection: %d", currentSelection);
         return;
     }
 
-    const AutonRoutine& selectedRoutine = routines[currentSelection - 1];
+    const AutonRoutine& selectedRoutine = routines[currentSelection];
 
     if (selectedRoutine.func) {
         selectedRoutine.func(selectedRoutine.parameter);
@@ -75,7 +85,7 @@ int AutonSelector::getRoutineCount() const {
 
 // Global object definitions
 const AutonRoutine COMPETITION_ROUTINES[] = {
-    {"Route 1", progSkills, 0}
+    {"Route 1", progSkills, true}
 };
 
 const AutonRoutine TESTING_ROUTINES[] = {

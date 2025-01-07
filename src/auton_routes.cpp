@@ -71,6 +71,79 @@ void endSection(int delay)
 // This file includes all of the routes coded in PROS for our robot
 // The routes should have linked path.jerryio files for reference
 
-void progSkills(int i){
+void progSkills(bool isRedTeam){
     
+}
+void RingRush(bool isRedTeam){
+
+    // 6 ring on one goal ringside route
+    if(isRedTeam){
+
+        chassis.setPose(58, 48 - 3.5 - 13.5/2,90);
+
+        // * Ring Rush
+        
+        intake.move(127);
+        chassis.moveToPoint(chassis.getPose().x + 50, chassis.getPose().y + 10, 2000, {.minSpeed=10});
+        delay(800);
+        left_doinker.set_value(LOW); // extend
+        chassis.waitUntilDone();
+        waitUntilRedIntake(2000);
+        intake.brake();
+
+        // * Retreat
+        chassis.moveToPoint(-33, 36, 1000, {.forwards=false}, false);
+        left_doinker.set_value(HIGH);
+        
+
+        // * Goal
+        Pose goal(-24,24,0);
+        chassis.swingToPoint(goal.x, goal.y, lemlib::DriveSide::RIGHT,1000,{},false);
+        chassis.moveToPoint(goal.x, goal.y,1000,{.forwards=false});
+        while(chassis.isInMotion() && chassis.getPose().distance(goal) > 2){
+            delay(20);
+        }
+        clamp.set_value(LOW);
+
+        // * Safe
+        chassis.turnToPoint(-24,48,1000,{},false);
+        intake.move(127);
+        chassis.moveToPoint(-24,56,2000,{.maxSpeed=50},false);
+        intake.brake();
+
+        // * Alliance
+
+        // * Preload
+
+        // * Corner
+
+    }
+    else{
+
+    }
+}
+void GoalRush(bool isRedTeam){
+
+    if(isRedTeam){
+
+    }
+    else{
+
+    }
+}
+void ringAWP(bool isRedTeam){
+    if(isRedTeam){
+
+    }
+    else{
+
+    }
+}
+void goalAWP(bool isRedTeam){
+    if(isRedTeam){
+
+    }
+    else{
+
+    }
 }

@@ -25,6 +25,7 @@ public:
     // Navigation methods
     void prevSelection();
     void nextSelection();
+    bool setSelection(int newSelection);
 
     // Execution method
     void runSelection();

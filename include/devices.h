@@ -25,7 +25,8 @@ extern PID ocPID;
 
 extern adi::Port oc_piston;
 extern adi::Port clamp;
-extern adi::Port doinker;
+extern adi::Port left_doinker;
+extern adi::Port right_doinker;
 extern adi::Port redirect;
 
 extern Optical ringSens;

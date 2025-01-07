@@ -1,4 +1,5 @@
 #include "testing.h"
+#include "auton_selector.h"
 #include "goal_sensor.h"
 #include "lemlib/chassis/chassis.hpp"
 #include "main.h"
@@ -136,11 +137,11 @@ void testOdometryStraight(int i)
     chassis.setPose(0, 0, 0);
     while (true)
     {
-        chassis.moveToPoint(0, 72, 3000, {.minSpeed = 1, .earlyExitRange = 1}, false);
+        chassis.moveToPoint(0, 72, 3000, {}, false);
         delay(500);
         chassis.printPose();
         endSection(1000000);
-        chassis.moveToPoint(0, 0, 3000, {.minSpeed = 1, .earlyExitRange = 1}, false);
+        chassis.moveToPoint(0, 0, 3000, {}, false);
         delay(500);
         chassis.printPose();
         endSection(1000000);
@@ -221,6 +222,8 @@ void testAuton(bool inputReq)
         // sets motor brake type to hold (standard for auton)
         left_motors.set_brake_mode_all(E_MOTOR_BRAKE_HOLD);
         right_motors.set_brake_mode_all(E_MOTOR_BRAKE_HOLD);
+
+        oc_piston.set_value(LOW);
 
         // initalize timer variables
         totalTime = 0;

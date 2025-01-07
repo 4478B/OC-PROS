@@ -152,6 +152,7 @@ void initialize()
     chassis.calibrate(); // calibrate sensors
 
     clamp.set_value(HIGH);
+    oc_piston.set_value(LOW);
 
     // initialize_oc_position();
     oc_motor.set_brake_mode_all(E_MOTOR_BRAKE_COAST);
@@ -358,7 +359,8 @@ void opcontrol()
         
         togglePiston(oc_piston,pros::E_CONTROLLER_DIGITAL_L2);
         togglePiston(clamp,pros::E_CONTROLLER_DIGITAL_B,true);
-        togglePiston(doinker,pros::E_CONTROLLER_DIGITAL_LEFT);
+        togglePiston(left_doinker,pros::E_CONTROLLER_DIGITAL_LEFT);
+        togglePiston(right_doinker,pros::E_CONTROLLER_DIGITAL_RIGHT);
         togglePiston(redirect,pros::E_CONTROLLER_DIGITAL_DOWN);
         
         // delay to save resources

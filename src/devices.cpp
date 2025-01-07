@@ -18,13 +18,15 @@ PID ocPID(.7, 0, .4);
 
 adi::Port oc_piston('A', pros::E_ADI_DIGITAL_OUT);
 adi::Port clamp('B', pros::E_ADI_DIGITAL_OUT);
-adi::Port doinker('C', pros::E_ADI_DIGITAL_OUT);
-adi::Port redirect('D',pros::E_ADI_DIGITAL_OUT);
+adi::Port left_doinker('C', pros::E_ADI_DIGITAL_OUT);
+adi::Port right_doinker('D', pros::E_ADI_DIGITAL_OUT);
+adi::Port redirect('E',pros::E_ADI_DIGITAL_OUT);
 
 Optical ringSens(0);
 Optical goalSens(0);
 
 Imu imu(0);
+
 
 // drivetrain settings
 Drivetrain drivetrain(&left_motors,               // left motor group
@@ -43,14 +45,14 @@ OdomSensors sensors(nullptr, // vertical tracking wheel 1
 );
 
 // lateral PID controller
-ControllerSettings lateral_controller(10,  // proportional gain (kP)
+ControllerSettings lateral_controller(11,  // proportional gain (kP)
                                       0,   // integral gain (kI)
-                                      3,   // derivative gain (kD)
+                                      6,   // derivative gain (kD)
                                       3,   // anti windup
                                       1,   // small error range, in inches
                                       100, // small error range timeout, in milliseconds
-                                      3,   // large error range, in inches
-                                      500, // large error range timeout, in milliseconds
+                                      2,   // large error range, in inches
+                                      800, // large error range timeout, in milliseconds
                                       20   // maximum acceleration (slew)
 );
 
@@ -60,7 +62,7 @@ ControllerSettings angular_controller(2,   // proportional gain (kP)
                                       10,  // derivative gain (kD)
                                       3,   // anti windup
                                       1,   // small error range, in inches
-                                      200, // small error range timeout, in milliseconds
+                                      100, // small error range timeout, in milliseconds
                                       3,   // large error range, in inches
                                       500, // large error range timeout, in milliseconds
                                       0    // maximum acceleration (slew)
