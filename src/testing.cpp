@@ -91,26 +91,36 @@
 }*/
 
 void testRingSens(int i)
-{
+{   
     while (true)
     {
 
         intake.move(80);
         pros::lcd::clear_line(1);
         pros::lcd::print(1, "Waiting for red...");
-        waitUntilRedIntake(100000);
+        color_sort.waitUntilDetected(100000,Hue::RED);
         intake.brake();
         pros::lcd::clear_line(1);
-        pros::lcd::print(1, "Got red!");
+        if(color_sort.isDetected(Hue::RED)){
+            pros::lcd::print(1, "Got red!");
+        }
+        else{
+            pros::lcd::print(1, "No red...");
+        }
         endSection(1000000);
 
         intake.move(80);
         pros::lcd::clear_line(1);
         pros::lcd::print(1, "Waiting for blue...");
-        waitUntilBlueIntake(100000);
+        color_sort.waitUntilDetected(100000,Hue::BLUE);
         intake.brake();
         pros::lcd::clear_line(1);
-        pros::lcd::print(1, "Got blue!");
+        if(color_sort.isDetected(Hue::BLUE)){
+            pros::lcd::print(1, "Got blue!");
+        }
+        else{
+            pros::lcd::print(1, "No blue...");
+        }
         endSection(1000000);
     }
 }

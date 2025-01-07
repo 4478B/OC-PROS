@@ -6,6 +6,7 @@
 #include "lemlib/api.hpp"
 #include "lemlib/pid.hpp"
 #include "extended_chassis.h"
+#include "color_sort.h"
 
 // namespace for declarations
 using namespace pros;
@@ -40,5 +41,6 @@ extern ControllerSettings lateral_controller;
 extern ControllerSettings angular_controller;
 extern ExpoDriveCurve throttle_curve;
 extern ExtendedChassis chassis;
+extern ColorSort color_sort;
 
 #endif // DEVICES_H

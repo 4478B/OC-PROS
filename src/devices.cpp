@@ -81,3 +81,6 @@ ExtendedChassis chassis(drivetrain,         // drivetrain settings
                         sensors,            // odometry sensors
                         &throttle_curve     // log drive
 );
+
+// create the color sorter
+ColorSort color_sort;

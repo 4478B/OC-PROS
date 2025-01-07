@@ -266,26 +266,22 @@ void handleDriveTrain()
 void handleIntake(pros::controller_digital_e_t buttonUp, pros::controller_digital_e_t buttonDown)
 {
 
-    // manual controls are overridden if color sort mechanism is active
-    if (!colorSortHandler::getInstance().getIsCurrentlySorting())
+    // intake
+    if (controller.get_digital(buttonUp))
     {
-
-        // intake
-        if (controller.get_digital(buttonUp))
-        {
-            intake.move(127);
-        }
-        // outtake
-        else if (controller.get_digital(buttonDown))
-        {
-            intake.move(-127);
-        }
-        // no movement without button pressed
-        else
-        {
-            intake.brake();
-        }
+        intake.move(127);
     }
+    // outtake
+    else if (controller.get_digital(buttonDown))
+    {
+        intake.move(-127);
+    }
+    // no movement without button pressed
+    else
+    {
+        intake.brake();
+    }
+    
 }
 
 void togglePiston(adi::Port piston, pros::controller_digital_e_t button, bool printToController = false){
