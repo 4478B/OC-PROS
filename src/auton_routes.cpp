@@ -122,7 +122,7 @@ void RingRush(bool isRedTeam){
         
         // * Reset
         Pose cornerReset(-65,65,0);
-        chassis.tank(10,10,true);
+        all_motors.move_velocity(40);
         delay(500);
 
         // debug start
@@ -134,7 +134,7 @@ void RingRush(bool isRedTeam){
         // debug end
 
         chassis.setPose(cornerReset.x,cornerReset.y,imu.get_heading());
-        chassis.cancelAllMotions();
+        all_motors.brake();
 
         // * Preload
         Pose preload(-55,42,0);
@@ -152,7 +152,7 @@ void RingRush(bool isRedTeam){
         chassis.moveToPoint(alliance.x,alliance.y-10, 1000,{.maxSpeed=40,.minSpeed=40,.earlyExitRange=5});
         color_sort.waitUntilDetected(1000);
         if(color_sort.isDetected(Hue::RED)){
-            
+
         }
         redirect.set_value(HIGH);
         chassis.waitUntilDone();

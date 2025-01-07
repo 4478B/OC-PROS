@@ -1,21 +1,14 @@
 #include "testing.h"
-#include "auton_selector.h"
-#include "goal_sensor.h"
 #include "lemlib/chassis/chassis.hpp"
-#include "main.h"
 #include "lemlib/api.hpp" // IWYU pragma: keep
-#include "lemlib/pid.hpp"
 #include "liblvgl/llemu.hpp"
 #include "pros/adi.h"
 #include "pros/misc.h"
 #include "pros/motors.h"
-#include "pros/rotation.hpp"
 #include <cstdlib>
 #include "devices.h"
 #include "auton_routes.h"
-#include "old_systems.h"
 #include <iomanip>
-#include "color_sort.h"
 
 /*void testCombinedPID()
 {
@@ -92,10 +85,28 @@
 
 void testRingSens(int i)
 {   
+    int intakeVelocity = 80;
+    pros::Task user_input_task([&]() {
+        while (true) {
+            pros::lcd::print(0, "Up: +10, Down: -10");
+            pros::lcd::print(1, "intake speed: %f", intake.get_actual_velocity());
+
+            // increase intake speed by 10 if up button is pressed
+            if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_UP)) {
+                intakeVelocity += 10;
+            }
+            // decrease intake speed by 10 if down button is pressed
+            else if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_DOWN)) {
+                intakeVelocity -= 10;
+            }
+            pros::delay(20);
+        }
+    });
+
     while (true)
     {
 
-        intake.move(80);
+        intake.move(intakeVelocity);
         pros::lcd::clear_line(1);
         pros::lcd::print(1, "Waiting for red...");
         color_sort.waitUntilDetected(100000,Hue::RED);
@@ -109,7 +120,7 @@ void testRingSens(int i)
         }
         endSection(1000000);
 
-        intake.move(80);
+        intake.move(intakeVelocity);
         pros::lcd::clear_line(1);
         pros::lcd::print(1, "Waiting for blue...");
         color_sort.waitUntilDetected(100000,Hue::BLUE);
@@ -127,16 +138,38 @@ void testRingSens(int i)
 
 void testGoalSens(int i)
 {
+    int driveVelocity = 40;
+    pros::Task user_input_task([&]() {
+        while (true) {
+            pros::lcd::print(0, "Up: +10, Down: -10");
+            pros::lcd::print(1, "intake speed: %f", intake.get_actual_velocity());
+
+            // increase drive speed by 10 if up button is pressed
+            if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_UP)) {
+                driveVelocity += 10;
+            }
+            // decrease drive speed by 10 if down button is pressed
+            else if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_DOWN)) {
+                driveVelocity -= 10;
+            }
+            pros::delay(20);
+        }
+    });
     while (true)
     {
-
+        all_motors.set_brake_mode(E_MOTOR_BRAKE_COAST);
         pros::lcd::clear_line(1);
         pros::lcd::print(1, "Waiting for goal...");
-        all_motors.move(40);
-        waitUntilClamp(48000000, 1000000);
+        all_motors.move_velocity(driveVelocity);
+        auto_clamp.waitUntilClamp(100, 1000);
         all_motors.brake();
         pros::lcd::clear_line(1);
-        pros::lcd::print(1, "Got goal!");
+        if(auto_clamp.isGoalClamped()){
+            pros::lcd::print(1, "Got goal!");
+        }
+        else{
+            pros::lcd::print(1, "No goal...");
+        }
         endSection(1000000);
     }
 }

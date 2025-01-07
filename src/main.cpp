@@ -10,10 +10,7 @@
 #include <cstdlib>
 #include "devices.h"
 #include "auton_selector.h"
-#include "auton_routes.h"
 #include "testing.h"
-#include "old_systems.h"
-#include "color_sort.h"
 
 // Global variables needed for oc control
 int ocMove = NONE;
@@ -147,37 +144,22 @@ void initialize_oc_position()
 void initialize()
 {
 
-    controller.clear();
-    lcd::initialize();   // initialize brain screen
-    chassis.calibrate(); // calibrate sensors
+    lcd::initialize();   // initialize the LCD screen on the VEX brain
+    chassis.calibrate(); // Calibrates the chassis sensors to ensure accurate readings
 
-    clamp.set_value(HIGH);
-    oc_piston.set_value(LOW);
+    clamp.set_value(HIGH); // Set the clamp to the high position
+    oc_piston.set_value(LOW); // Set the oc piston to the low position
 
-    // initialize_oc_position();
-    oc_motor.set_brake_mode_all(E_MOTOR_BRAKE_COAST);
+    ringSens.set_led_pwm(100); // Set the LED brightness to 100%
+    ringSens.set_integration_time(10); // Sets the integration time for the ring sensor to 10ms
 
-    // create oc control task
+    oc_motor.set_brake_mode_all(E_MOTOR_BRAKE_COAST); // Set all motors to coast mode
+
+    // Create a task for controlling the oc motor
     Task oc_task(oc_control_task, nullptr, "oc Control Task");
 
-    // create color sort task
-    // colorSortHandler& sorter = colorSortHandler::getInstance();
-    // Task csort_task(color_sort_task, nullptr, "Color Sort Task");
+    pros::lcd::set_text_align(pros::lcd::Text_Align::CENTER); // Set the text alignment to center on the LCD screen
 
-    pros::lcd::set_text_align(pros::lcd::Text_Align::CENTER);
-
-    // print odometry position to brain screen
-    /*pros::Task screen_task([&]() {
-        while (true) {
-            // print robot location to the brain screen
-            pros::lcd::print(0, "X: %f", chassis.getPose().x); // x
-            pros::lcd::print(1, "Y: %f", chassis.getPose().y); // y
-            pros::lcd::print(2, "Theta: %f", chassis.getPose().theta); // heading
-
-            // delay to save resources
-            pros::delay(20);
-        }
-    });*/
 }
 
 void autonomous()
@@ -215,10 +197,6 @@ void competition_initialize()
     inCompetition = true;
     // show current route on brain screen
     competitionSelector.displaySelectionBrain();
-
-    // run buttons once to print values on screen
-    on_left_button();
-    on_right_button();
 
     // assign buttons to actions in auton selector
     lcd::register_btn0_cb(on_left_button);
