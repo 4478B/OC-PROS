@@ -82,7 +82,6 @@ void RingRush(bool isRedTeam){
         chassis.setPose(58, 48 - 3.5 - 13.5/2,90);
 
         // * Ring Rush
-        
         intake.move(127);
         chassis.moveToPoint(chassis.getPose().x + 50, chassis.getPose().y + 10, 2000, {.minSpeed=10});
         delay(800);
@@ -98,12 +97,13 @@ void RingRush(bool isRedTeam){
 
         // * Goal
         Pose goal(-24,24,0);
-        chassis.swingToPoint(goal.x, goal.y, lemlib::DriveSide::RIGHT,1000,{},false);
+        chassis.swingToPoint(goal.x, goal.y, lemlib::DriveSide::RIGHT,1000,{.direction=lemlib::AngularDirection::CCW_COUNTERCLOCKWISE},false);
         chassis.moveToPoint(goal.x, goal.y,1000,{.forwards=false});
         while(chassis.isInMotion() && chassis.getPose().distance(goal) > 2){
             delay(20);
         }
         clamp.set_value(LOW);
+        chassis.waitUntilDone();
 
         // * Safe
         chassis.turnToPoint(-24,48,1000,{},false);
@@ -111,11 +111,50 @@ void RingRush(bool isRedTeam){
         chassis.moveToPoint(-24,56,2000,{.maxSpeed=50},false);
         intake.brake();
 
-        // * Alliance
+        // * Corner
+        Pose corner(-65,65,-45);
+        chassis.moveToPose(corner.x,corner.y,corner.theta,1000,{.minSpeed=20});
+        while(chassis.isInMotion() && chassis.getPose().distance(corner) > 6){
+            delay(20);
+        }
+        intake.move(127);
+        chassis.waitUntilDone();
+        
+        // * Reset
+        Pose cornerReset(-65,65,0);
+        chassis.tank(10,10,true);
+        delay(500);
+
+        // debug start
+        pros::lcd::print(1,"x start: %d", chassis.getPose().x);
+        pros::lcd::print(2,"y start: %d", chassis.getPose().y);
+        delay(500);
+        pros::lcd::print(3,"x end: %d", chassis.getPose().x);
+        pros::lcd::print(4,"y end: %d", chassis.getPose().y);
+        // debug end
+
+        chassis.setPose(cornerReset.x,cornerReset.y,imu.get_heading());
+        chassis.cancelAllMotions();
 
         // * Preload
+        Pose preload(-55,42,0);
+        chassis.swingToHeading(200,lemlib::DriveSide::RIGHT,1000,{.direction=lemlib::AngularDirection::CCW_COUNTERCLOCKWISE},false);
+        chassis.moveToPoint(preload.x,preload.y,1000,{.minSpeed=40,.earlyExitRange=5});
 
-        // * Corner
+        // * Alliance
+        Pose alliance(-47,0,0);
+        chassis.moveToPoint(alliance.x,alliance.y,1000,{.minSpeed=20,.earlyExitRange=5});
+        while(chassis.isInMotion() && chassis.getPose().distance(alliance) > 6){
+            delay(20);
+        }
+        redirect.set_value(LOW);
+        chassis.waitUntilDone();
+        chassis.moveToPoint(alliance.x,alliance.y-10, 1000,{.maxSpeed=40,.minSpeed=40,.earlyExitRange=5});
+        int ringDetections = 0;
+        while(chassis.isInMotion()){
+            delay(20);
+        }
+
 
     }
     else{
