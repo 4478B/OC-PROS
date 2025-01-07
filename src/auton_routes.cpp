@@ -1,4 +1,5 @@
 #include "auton_routes.h"
+#include "auto_clamp.h"
 #include "lemlib/chassis/chassis.hpp"
 #include "main.h"
 #include "lemlib/api.hpp" // IWYU pragma: keep
@@ -99,10 +100,20 @@ void RingRush(bool isRedTeam){
         Pose goal(-24,24,0);
         chassis.swingToPoint(goal.x, goal.y, lemlib::DriveSide::RIGHT,1000,{.direction=lemlib::AngularDirection::CCW_COUNTERCLOCKWISE},false);
         chassis.moveToPoint(goal.x, goal.y,1000,{.forwards=false});
-        while(chassis.isInMotion() && chassis.getPose().distance(goal) > 2){
+        while(chassis.isInMotion() && !auto_clamp.isDetected()){
             delay(20);
         }
         clamp.set_value(LOW);
+        delay(50);
+        // switch to primitive control if odom fails
+        if(!auto_clamp.isGoalClamped()){
+            clamp.set_value(HIGH);
+            all_motors.move_velocity(-50);
+            auto_clamp.waitUntilClamp(10,1000);
+            clamp.set_value(LOW);
+            delay(50);
+            all_motors.brake();
+        }
         chassis.waitUntilDone();
 
         // * Safe
@@ -156,6 +167,21 @@ void RingRush(bool isRedTeam){
         }
         redirect.set_value(HIGH);
         chassis.waitUntilDone();
+
+        // * OPTIONAL: Positive Corner
+        // THIS NEEDS TO BE TOGGLED ON/OFF DEPENDING ON THE ALLIANCE
+        if(false){
+            Pose posCorner(-65,-65,45);
+            bool allianceClearsCorner = false;
+            if(allianceClearsCorner){
+                chassis.turnToPoint(posCorner.x,posCorner.y,1000,{.forwards=false},false);
+                chassis.moveToPose(posCorner.x,posCorner.y,posCorner.theta,1000,{.forwards=false,.minSpeed=70},false);
+            }
+            else{
+                chassis.moveToPose(posCorner.x,posCorner.y+5,180,1000,{.minSpeed=70},false);
+            }
+        }
+
     }
     else{
 

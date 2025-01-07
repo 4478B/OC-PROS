@@ -9,11 +9,9 @@ namespace Goal {
 
 class AutoClamp {
 public:
+    static bool isDetected();
     static void waitUntilClamp(int maxDist, int maxTime);
     static bool isGoalClamped();
-
-private:
-    static bool isDetected();
 };
 
 #endif // GOAL_SENSOR_H
