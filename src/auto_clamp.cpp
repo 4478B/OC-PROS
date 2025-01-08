@@ -8,7 +8,7 @@ namespace Goal {
     const int MAX_DISTANCE = 10; // Maximum distance goal is to be counted
 }
 
-
+bool AutoClamp::isActive = false;
 
 bool AutoClamp::isDetected() {
     int currentGoalDist = 255 - goalSens.get_proximity(); // Get the current distance from the sensor
@@ -60,3 +60,46 @@ bool AutoClamp::isGoalClamped() {
     // If goal is detected and clamp is down
     return (isDetected() && clamp.is_extended());
 }
+
+void auto_clamp_task(void *param)
+{
+    int goalDetected = 0; // Counter for consecutive goal detections
+
+    // Loop forever
+    while (true)
+    {
+        while(!AutoClamp::isActive){
+            pros::delay(20);
+        }
+        // If clamp is already extended, skip the detection logic
+        if (clamp.is_extended()) {
+            pros::delay(20);
+            continue;
+        }
+
+        // Check if goal is detected
+        bool detected = AutoClamp::isDetected();
+
+        // If goal is detected
+        if (detected)
+        {
+            // Increment the detection counter if conditions are met
+            goalDetected++;
+        }
+        else
+        {
+            // Reset the detection counter if the conditions are not met
+            goalDetected = 0;
+        }
+
+        // If goal is detected enough times and clamp is up
+        if (goalDetected >= Goal::MIN_DETECTION && !clamp.is_extended())
+        {
+            // Extend the clamp
+            clamp.extend();
+        }
+
+        // Delay to save resources
+        pros::delay(20);
+    }
+}    

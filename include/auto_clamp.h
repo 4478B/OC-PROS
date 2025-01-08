@@ -9,6 +9,7 @@ namespace Goal {
 
 class AutoClamp {
 public:
+    static bool isActive;
     static bool isDetected();
     static void waitUntilClamp(int maxDist, int maxTime);
     static bool isGoalClamped();
