@@ -3,6 +3,7 @@
 #include "lemlib/chassis/chassis.hpp"
 #include "lemlib/api.hpp" // IWYU pragma: keep
 #include "liblvgl/llemu.hpp"
+#include "overclock_mech.h"
 #include "pros/adi.h"
 #include "pros/misc.h"
 #include "pros/motors.h"
@@ -195,7 +196,6 @@ void testAuton(bool inputReq)
     // if the parameter inputReq is set to true (default), these buttons
     // will start the route when all pressed
     bool buttonsPressed = controller.get_digital(pros::E_CONTROLLER_DIGITAL_A) && controller.get_digital(pros::E_CONTROLLER_DIGITAL_B) && controller.get_digital(pros::E_CONTROLLER_DIGITAL_X) && controller.get_digital(pros::E_CONTROLLER_DIGITAL_Y);
-
     
     // it runs once automatically with inputReq, otherwise manually
     if ((!inputReq && autonSection == 0) || buttonsPressed)
@@ -210,6 +210,7 @@ void testAuton(bool inputReq)
         right_motors.set_brake_mode_all(E_MOTOR_BRAKE_HOLD);
 
         oc_piston.set_value(LOW);
+        clamp.retract();
 
         // initalize timer variables
         totalTime = 0;

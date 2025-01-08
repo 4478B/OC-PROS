@@ -23,5 +23,6 @@ public:
 private:
     pros::controller_digital_e_t button;
     ControlType controlType;
+    bool startExtended;
 };
 #endif // PISTON_H

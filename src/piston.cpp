@@ -15,27 +15,41 @@ Piston::Piston(
 }
 void Piston::handle(bool printing)
 {
-    // if corresponding button is pressed
-    if (controller.get_digital_new_press(button) && controlType == ControlType::TOGGLE)
+    // Get the initial status of the piston (extended or retracted)
+    bool initStatus = this->is_extended();
+    // Check if the button was newly pressed
+    bool buttonNewPress = controller.get_digital_new_press(button);
+    // Check if the button is currently pressed
+    bool buttonPressed = controller.get_digital(button);
+
+    // Handle control type TOGGLE
+    if (controlType == ControlType::TOGGLE && buttonNewPress)
     {
-        // toggle piston state
-        this->is_extended() ? this->retract() : this->extend();
+        // Toggle piston state
+        initStatus ? this->retract() : this->extend();
     }
-    else if (controller.get_digital(button) && controlType == ControlType::HOLD)
-    {
-        // extend piston
-        this->extend();
-    }
+    // Handle control type HOLD
     else if (controlType == ControlType::HOLD)
     {
-        // retract piston
-        this->retract();
-    
+        if (buttonPressed)
+        {
+            // If button is pressed, set piston to opposite of startExtended state
+            startExtended ? this->retract() : this->extend();
+        }
+        else
+        {
+            // If button is not pressed, set piston to startExtended state
+            startExtended ? this->extend() : this->retract();
+        }
     }
 
-    // print piston state with name of object to controller
-    if (printing)
+    // Get the final status of the piston (extended or retracted)
+    bool finalStatus = this->is_extended();
+
+    // If printing is enabled and the piston state has changed
+    if (printing && initStatus != finalStatus)
     {
-        pros::lcd::print(1, "Piston %d: %s", this->get_port(), this->is_extended() ? "XXXXXXXXXXXXXXXXXXXXXXX" : "                       ");
+        // Print piston state to controller
+        controller.print(1, 1, finalStatus ? "XXXXXXXXXXXXXXXXXXXXXXX" : "                       ");
     }
 }
