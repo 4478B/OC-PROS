@@ -21,7 +21,7 @@ void AutoClamp::waitUntilClamp(int maxDist, int maxTime) {
     int goalDetected = 0; // Counter for consecutive goal detections
 
     // Ensure clamp is up
-    clamp.set_value(HIGH);
+    clamp.retract();
 
     // Set up motor for distance tracking
     left_motors.tare_position(0);
@@ -53,10 +53,10 @@ void AutoClamp::waitUntilClamp(int maxDist, int maxTime) {
     }
 
     // Clamp goal
-    clamp.set_value(LOW);
+    clamp.extend();
 }
 
 bool AutoClamp::isGoalClamped() {
     // If goal is detected and clamp is down
-    return (isDetected() && clamp.get_value() == LOW);
+    return (isDetected() && clamp.is_extended());
 }

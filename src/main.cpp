@@ -1,5 +1,4 @@
 #include "main.h"
-#include "extended_chassis.h"
 #include "lemlib/api.hpp" // IWYU pragma: keep
 #include "lemlib/pid.hpp"
 #include "liblvgl/llemu.hpp"
@@ -147,8 +146,8 @@ void initialize()
     lcd::initialize();   // initialize the LCD screen on the VEX brain
     chassis.calibrate(); // Calibrates the chassis sensors to ensure accurate readings
 
-    clamp.set_value(HIGH); // Set the clamp to the high position
-    oc_piston.set_value(LOW); // Set the oc piston to the low position
+    clamp.retract(); // Set the clamp to the high position
+    oc_piston.retract(); // Set the oc piston to the low position
 
     ringSens.set_led_pwm(100); // Set the LED brightness to 100%
     ringSens.set_integration_time(10); // Sets the integration time for the ring sensor to 10ms
@@ -262,33 +261,6 @@ void handleIntake(pros::controller_digital_e_t buttonUp, pros::controller_digita
     
 }
 
-void togglePiston(adi::Port piston, pros::controller_digital_e_t button, bool printToController = false){
-    
-    // if corresponding button is pressed
-    if(controller.get_digital_new_press(button)){
-
-        // toggle piston state
-        int init_piston_state = piston.get_value();
-        int new_piston_state = init_piston_state == LOW ? HIGH : LOW;
-        piston.set_value(new_piston_state);
-
-        if(printToController){         
-            if(new_piston_state == LOW){
-                controller.print(0,0,"XXXXXXXXXXXXXXXXXX");
-            }
-            else {
-                controller.print(0,0,"                  ");
-            }
-            /*
-            // debug printing
-            pros::lcd::print(3,"initial state %f", init_piston_state);
-            pros::lcd::print(4,"new state %f", new_piston_state);
-            pros::lcd::print(5,"piston state %f", piston.get_value());
-            */
-        }
-    }
-}
-
 bool returnOC = false; // if oc still needs to return
 
 void handleOCMotor(pros::controller_digital_e_t button)
@@ -331,11 +303,11 @@ void opcontrol()
         handleIntake(pros::E_CONTROLLER_DIGITAL_R1,pros::E_CONTROLLER_DIGITAL_R2);
         handleOCMotor(pros::E_CONTROLLER_DIGITAL_L1);
         
-        togglePiston(oc_piston,pros::E_CONTROLLER_DIGITAL_L2);
-        togglePiston(clamp,pros::E_CONTROLLER_DIGITAL_B,true);
-        togglePiston(left_doinker,pros::E_CONTROLLER_DIGITAL_LEFT);
-        togglePiston(right_doinker,pros::E_CONTROLLER_DIGITAL_RIGHT);
-        togglePiston(redirect,pros::E_CONTROLLER_DIGITAL_DOWN);
+        oc_piston.handle();
+        clamp.handle(true);
+        left_doinker.handle();
+        right_doinker.handle();
+        redirect.handle();
         
         // delay to save resources
         pros::delay(20);

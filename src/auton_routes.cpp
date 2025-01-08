@@ -86,14 +86,14 @@ void RingRush(bool isRedTeam){
         intake.move(127);
         chassis.moveToPoint(chassis.getPose().x + 50, chassis.getPose().y + 10, 2000, {.minSpeed=10});
         delay(800);
-        left_doinker.set_value(LOW); // extend
+        left_doinker.extend(); // extend
         chassis.waitUntilDone();
         color_sort.waitUntilDetected(2000,Hue::RED);
         intake.brake();
 
         // * Retreat
         chassis.moveToPoint(-33, 36, 1000, {.forwards=false}, false);
-        left_doinker.set_value(HIGH);
+        left_doinker.retract();
         
 
         // * Goal
@@ -103,14 +103,14 @@ void RingRush(bool isRedTeam){
         while(chassis.isInMotion() && !auto_clamp.isDetected()){
             delay(20);
         }
-        clamp.set_value(LOW);
+        clamp.extend();
         delay(50);
         // switch to primitive control if odom fails
         if(!auto_clamp.isGoalClamped()){
-            clamp.set_value(HIGH);
+            clamp.retract();
             all_motors.move_velocity(-50);
             auto_clamp.waitUntilClamp(10,1000);
-            clamp.set_value(LOW);
+            clamp.extend();
             delay(50);
             all_motors.brake();
         }
@@ -158,14 +158,14 @@ void RingRush(bool isRedTeam){
         while(chassis.isInMotion() && chassis.getPose().distance(alliance) > 6){
             delay(20);
         }
-        redirect.set_value(LOW);
+        redirect.extend();
         chassis.waitUntilDone();
         chassis.moveToPoint(alliance.x,alliance.y-10, 1000,{.maxSpeed=40,.minSpeed=40,.earlyExitRange=5});
         color_sort.waitUntilDetected(1000);
         if(color_sort.isDetected(Hue::RED)){
 
         }
-        redirect.set_value(HIGH);
+        redirect.retract();
         chassis.waitUntilDone();
 
         // * OPTIONAL: Positive Corner

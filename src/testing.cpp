@@ -174,65 +174,6 @@ void testGoalSens(int i)
     }
 }
 
-void testOdometryStraight(int i)
-{
-
-    chassis.setPose(0, 0, 0);
-    while (true)
-    {
-        chassis.moveToPoint(0, 72, 3000, {}, false);
-        delay(500);
-        chassis.printPose();
-        endSection(1000000);
-        chassis.moveToPoint(0, 0, 3000, {}, false);
-        delay(500);
-        chassis.printPose();
-        endSection(1000000);
-    }
-}
-
-void testOdometryTurn(int i)
-{
-
-    chassis.setPose(0, 0, 0);
-    while (true)
-    {
-        chassis.moveToPose(0, 0, 90, 3000, {}, false);
-        delay(500);
-        chassis.printPose();
-        endSection(1000000);
-        chassis.moveToPose(0, 0, 0, 3000, {}, false);
-        delay(500);
-        chassis.printPose();
-        endSection(1000000);
-
-        chassis.moveToPose(0, 0, 180, 3000, {}, false);
-        delay(500);
-        chassis.printPose();
-        endSection(1000000);
-        chassis.moveToPose(0, 0, 0, 3000, {}, false);
-        delay(500);
-        chassis.printPose();
-        endSection(1000000);
-    }
-}
-
-void testOdometryBoth(int i)
-{
-    chassis.setPose(0, 0, 0);
-    while (true)
-    {
-        chassis.moveToPose(24, 24, 90, 3000, {}, false);
-        delay(500);
-        chassis.printPose();
-        endSection(1000000);
-        chassis.moveToPose(0, 0, 0, 3000, {}, false);
-        delay(500);
-        chassis.printPose();
-        endSection(1000000);
-    }
-}
-
 /*
 
 
@@ -254,6 +195,7 @@ void testAuton(bool inputReq)
     // will start the route when all pressed
     bool buttonsPressed = controller.get_digital(pros::E_CONTROLLER_DIGITAL_A) && controller.get_digital(pros::E_CONTROLLER_DIGITAL_B) && controller.get_digital(pros::E_CONTROLLER_DIGITAL_X) && controller.get_digital(pros::E_CONTROLLER_DIGITAL_Y);
 
+    
     // it runs once automatically with inputReq, otherwise manually
     if ((!inputReq && autonSection == 0) || buttonsPressed)
     {

@@ -2,10 +2,10 @@
 #define DEVICES_H
 
 // required files for devices
+#include "piston.h"
 #include "main.h"
 #include "lemlib/api.hpp"
 #include "lemlib/pid.hpp"
-#include "extended_chassis.h"
 #include "color_sort.h"
 #include "auto_clamp.h"
 
@@ -25,11 +25,11 @@ extern Motor oc_motor;
 extern Rotation ocRot;
 extern PID ocPID;
 
-extern adi::Port oc_piston;
-extern adi::Port clamp;
-extern adi::Port left_doinker;
-extern adi::Port right_doinker;
-extern adi::Port redirect;
+extern Piston oc_piston;
+extern Piston clamp;
+extern Piston left_doinker;
+extern Piston right_doinker;
+extern Piston redirect;
 
 extern Optical ringSens;
 extern Optical goalSens;
@@ -41,7 +41,7 @@ extern OdomSensors sensors;
 extern ControllerSettings lateral_controller;
 extern ControllerSettings angular_controller;
 extern ExpoDriveCurve throttle_curve;
-extern ExtendedChassis chassis;
+extern Chassis chassis;
 extern ColorSort color_sort;
 extern AutoClamp auto_clamp;
 

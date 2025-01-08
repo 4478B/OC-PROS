@@ -1,5 +1,4 @@
 #include "devices.h"
-#include "extended_chassis.h"
 #include "pros/distance.hpp"
 
 // controller definition
@@ -16,11 +15,11 @@ Motor oc_motor(9, pros::MotorGearset::green);
 Rotation ocRot(12);
 PID ocPID(.7, 0, .4);
 
-adi::Port oc_piston('A', pros::E_ADI_DIGITAL_OUT);
-adi::Port clamp('B', pros::E_ADI_DIGITAL_OUT);
-adi::Port left_doinker('C', pros::E_ADI_DIGITAL_OUT);
-adi::Port right_doinker('D', pros::E_ADI_DIGITAL_OUT);
-adi::Port redirect('E',pros::E_ADI_DIGITAL_OUT);
+Piston oc_piston('A',false, pros::E_CONTROLLER_DIGITAL_L2);
+Piston clamp('B', false, pros::E_CONTROLLER_DIGITAL_B);
+Piston left_doinker('C',false, pros::E_CONTROLLER_DIGITAL_LEFT);
+Piston right_doinker('D',false, pros::E_CONTROLLER_DIGITAL_RIGHT);
+Piston redirect('E',false, pros::E_CONTROLLER_DIGITAL_DOWN);
 
 Optical ringSens(0);
 Optical goalSens(0);
@@ -75,7 +74,7 @@ ExpoDriveCurve throttle_curve(3,    // joystick deadband out of 127
 );
 
 // create the chassis
-ExtendedChassis chassis(drivetrain,         // drivetrain settings
+Chassis chassis(drivetrain,         // drivetrain settings
                         lateral_controller, // lateral PID settings
                         angular_controller, // angular PID settings
                         sensors,            // odometry sensors
