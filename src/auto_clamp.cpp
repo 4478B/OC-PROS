@@ -83,13 +83,8 @@ void auto_clamp_task(void *param)
     // Loop forever
     while (true)
     {
-        if(auto_clamp.isEnabled())
+        if(auto_clamp.isEnabled() && !clamp.is_extended())
         {
-            // If clamp is already extended, skip the detection logic
-            if (clamp.is_extended()) {
-                pros::delay(20);
-                continue;
-            }
 
             // Check if goal is detected
             bool detected = AutoClamp::isDetected();
@@ -104,6 +99,8 @@ void auto_clamp_task(void *param)
             {
                 // Reset the detection counter if the conditions are not met
                 goalDetected = 0;
+                // Retract the clamp if goal is not detected and clamp is down
+                clamp.retract();
             }
 
             // If goal is detected enough times and clamp is up
