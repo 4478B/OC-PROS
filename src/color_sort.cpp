@@ -150,19 +150,23 @@ bool ColorSort::isEnabled() {
     return isActive;
 }
 
-void color_sort_task(void *param){
-
-    while(true){
-        if(color_sort.isEnabled()){
-            
-            if(color_sort.isDetected(color_sort.getRedirectHue())){
+// Task for controlling the color sorter
+void color_sort_task(void *param) {
+    while (true) {
+        // Check if the color sorter is enabled
+        if (color_sort.isEnabled()) {
+            // Check if the detected color matches the auto-redirect hue
+            if (color_sort.isDetected(color_sort.getRedirectHue())) {
+                // Extend the redirect mechanism if the redirect hue is detected
                 redirect.extend();
             }
-            else if(color_sort.isDetected(color_sort.getIntakeHue())){
+            // Check if the detected color matches the auto-intake hue
+            else if (color_sort.isDetected(color_sort.getIntakeHue())) {
+                // Retract the redirect mechanism if the intake hue is detected
                 redirect.retract();
             }
         }
+        // Wait briefly before the next iteration to prevent excessive polling
         pros::delay(20);
     }
-
 }

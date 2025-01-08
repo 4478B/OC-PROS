@@ -4,6 +4,7 @@
 #include "lemlib/pose.hpp"
 #include "main.h"
 #include "lemlib/api.hpp" // IWYU pragma: keep
+#include "overclock_mech.h"
 #include "pros/misc.h"
 #include <cstdlib>
 #include "devices.h"
@@ -180,8 +181,8 @@ void RingRush(bool isRedTeam, RingRushMode mode){
             // * ALLIANCE STAKE
             Pose stake(-63,0,270);
             chassis.moveToPose(stake.x,stake.y,stake.theta,3000,{.minSpeed=20});
-            oc.move(OCPos::HIGH);
-            oc.waitUntilDone();
+            overclock_mech.setTargetPos(OCMovement::HIGH_POS,false);
+            overclock_mech.waitUntilDone(1000);
         }
         else if(mode == RingRushMode::TOUCH_MID){
             Pose ladder(-10,0,90);
