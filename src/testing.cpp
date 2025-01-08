@@ -311,7 +311,7 @@ void tunePID()
             {
             case 1:
                 PID.kP += deltaVal;
-                cout << "kP: %f", PID.kP;
+                cout << "kP: " << PID.kP << endl;
                 break;
             case 2:
                 PID.kI += deltaVal;

@@ -2,12 +2,12 @@
 #define DEVICES_H
 
 // required files for devices
-#include "piston.h"
 #include "main.h"
-#include "lemlib/api.hpp"
+#include "piston.h"
 #include "lemlib/pid.hpp"
 #include "color_sort.h"
 #include "auto_clamp.h"
+#include "lemlib/chassis/chassis.hpp"
 
 // namespace for declarations
 using namespace pros;

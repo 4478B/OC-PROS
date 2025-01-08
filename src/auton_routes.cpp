@@ -3,16 +3,9 @@
 #include "lemlib/chassis/chassis.hpp"
 #include "main.h"
 #include "lemlib/api.hpp" // IWYU pragma: keep
-#include "lemlib/pid.hpp"
-#include "liblvgl/llemu.hpp"
-#include "pros/adi.h"
 #include "pros/misc.h"
-#include "pros/motors.h"
-#include "pros/rotation.hpp"
 #include <cstdlib>
 #include "devices.h"
-#include "old_systems.h"
-#include "pros/rtos.h"
 #include "testing.h"
 #include <iomanip>
 #include "color_sort.h"

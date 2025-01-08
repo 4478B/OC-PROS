@@ -1,14 +1,8 @@
 #include <cstdlib>
-#include <iomanip>
 #include "lemlib/api.hpp" // IWYU pragma: keep
-#include "lemlib/chassis/chassis.hpp"
 #include "pros/rtos.hpp"
-#include "auton_routes.h"
 #include "color_sort.h"
 #include "devices.h"
-#include "main.h"
-#include "old_systems.h"
-#include "testing.h"
 
 namespace Hue {
     const int RED = 0;

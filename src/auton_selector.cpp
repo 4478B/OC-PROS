@@ -2,7 +2,6 @@
 #include "auton_routes.h"
 #include "testing.h"
 #include "devices.h"
-#include <iostream>
 
 // Define the AutonRoutine structure
 struct AutonRoutine {
