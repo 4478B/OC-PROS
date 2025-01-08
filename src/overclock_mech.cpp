@@ -107,16 +107,4 @@ void oc_control_task(void *param) {
         }
     }
 }
-// Display all the information about the overclock mechanism on the LCD screen on lines 1-7
-void oc_screen_task(void *param) {
-    while (true) {
-        pros::lcd::print(1, "OC Pos: %d", overclock_mech.getTargetPos().getAngle());
-        pros::lcd::print(2, "OC Current: %f", overclock_mech.getCurrentPos());
-        pros::lcd::print(3, "OC Active: %d", overclock_mech.getIsActive());
-        pros::lcd::print(4, "OC Return Low: %d", overclock_mech.getReturnLowAfterMove());
-        pros::lcd::print(5, "OC Brake Mode: %d", overclock_mech.getTargetPos().getBrakeMode());
-        pros::lcd::print(6, "OC Using PID: %d", overclock_mech.getTargetPos().getIsUsingPID());
-        pros::lcd::print(7, "OC Direction: %d", overclock_mech.getTargetPos().getAngularDirection());
-        pros::delay(100);
-    }
-}
+

@@ -2,6 +2,7 @@
 #include "lemlib/api.hpp" // IWYU pragma: keep
 #include <cstdlib>
 #include "devices.h"
+#include "screen.h"
 
 namespace Goal {
     const int MIN_DETECTION = 3; // Amount of detections needed to quit loop
@@ -29,8 +30,11 @@ void AutoClamp::waitUntilClamp(int maxDist, int maxTime) {
     // Convert maxDist from inches to rotations
     double maxDistRotations = maxDist / (lemlib::Omniwheel::NEW_275 * M_PI);
 
-    pros::lcd::print(1, "Max Distance (inches): %d", maxDist);
-    pros::lcd::print(2, "Max Time: %d ms", maxTime);
+    if(Screen::current_screen == screen_state::TEMP1){
+        pros::lcd::print(1, "Max Distance (inches): %d", maxDist);
+        pros::lcd::print(2, "Max Time: %d ms", maxTime);
+    }
+    
 
     // Loop until goal is detected enough times or it times out
     while (pros::millis() - startTime < maxTime && goalDetected < Goal::MIN_DETECTION && left_motors.get_position(0) > -maxDistRotations) {
@@ -44,10 +48,12 @@ void AutoClamp::waitUntilClamp(int maxDist, int maxTime) {
             goalDetected = 0;
         }
 
-        double currentGoalDistInches = (255 - goalSens.get_proximity()) * (lemlib::Omniwheel::NEW_275 * M_PI);
-        pros::lcd::print(3, "Current Goal Distance (inches): %f", currentGoalDistInches);
-        pros::lcd::print(4, "Goal Detected Count: %d", goalDetected);
-        pros::lcd::print(5, "Left Motor Position (inches): %f", left_motors.get_position() * (lemlib::Omniwheel::NEW_275 * M_PI));
+        if(Screen::current_screen == screen_state::TEMP1){
+            double currentGoalDistInches = (255 - goalSens.get_proximity()) * (lemlib::Omniwheel::NEW_275 * M_PI);
+            pros::lcd::print(3, "Current Goal Distance (inches): %f", currentGoalDistInches);
+            pros::lcd::print(4, "Goal Detected Count: %d", goalDetected);
+            pros::lcd::print(5, "Left Motor Position (inches): %f", left_motors.get_position(0) * (lemlib::Omniwheel::NEW_275 * M_PI));
+        }
 
         pros::delay(20);
     }
@@ -117,13 +123,3 @@ void auto_clamp_task(void *param)
     }
 }    
 
-// Display all the information about the autoclamp mechanism on the LCD screen on lines 1-7
-void auto_clamp_screen_task(void *param) {
-    while (true) {
-        pros::lcd::print(1, "Goal Detected: %s", auto_clamp.isDetected() ? "True" : "False");
-        pros::lcd::print(2, "Goal Clamped: %s", auto_clamp.isGoalClamped() ? "True" : "False");
-        pros::lcd::print(3, "Auto Clamp Enabled: %s", auto_clamp.isEnabled() ? "True" : "False");
-        pros::lcd::print(4, "Clamp State: %s", clamp.is_extended() ? "Extended" : "Retracted");
-        pros::delay(100);
-    }
-}
