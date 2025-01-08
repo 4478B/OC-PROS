@@ -22,13 +22,15 @@ private:
     static bool isActive;
     static int autoRedirectHue;
     static int autoIntakeHue;
+    void setActive(bool active);
 public:
     ColorSort();
     int getLastDetection(int hue = Hue::ANY) const;
     bool isDetected(int hue = Hue::ANY);
     bool waitUntilDetected(int msecTimeout, int hue = Hue::ANY);
-    void toggleActive();
-    bool getActive();
+    bool isEnabled();
+    void enable();
+    void disable();
     void setAutoRedirect(int hue);
     int getRedirectHue();
     int getIntakeHue();

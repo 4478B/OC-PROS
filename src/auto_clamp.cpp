@@ -61,6 +61,21 @@ bool AutoClamp::isGoalClamped() {
     return (isDetected() && clamp.is_extended());
 }
 
+bool AutoClamp::isEnabled() {
+    return isActive;
+}
+
+void AutoClamp::setActive(bool active) {
+    isActive = active;
+}
+
+void AutoClamp::enable() {
+    setActive(true);
+}
+void AutoClamp::disable() {
+    setActive(false);
+}
+
 void auto_clamp_task(void *param)
 {
     int goalDetected = 0; // Counter for consecutive goal detections
@@ -68,38 +83,39 @@ void auto_clamp_task(void *param)
     // Loop forever
     while (true)
     {
-        while(!AutoClamp::isActive){
-            pros::delay(20);
-        }
-        // If clamp is already extended, skip the detection logic
-        if (clamp.is_extended()) {
-            pros::delay(20);
-            continue;
-        }
-
-        // Check if goal is detected
-        bool detected = AutoClamp::isDetected();
-
-        // If goal is detected
-        if (detected)
+        if(auto_clamp.isEnabled())
         {
-            // Increment the detection counter if conditions are met
-            goalDetected++;
-        }
-        else
-        {
-            // Reset the detection counter if the conditions are not met
-            goalDetected = 0;
-        }
+            // If clamp is already extended, skip the detection logic
+            if (clamp.is_extended()) {
+                pros::delay(20);
+                continue;
+            }
 
-        // If goal is detected enough times and clamp is up
-        if (goalDetected >= Goal::MIN_DETECTION && !clamp.is_extended())
-        {
-            // Extend the clamp
-            clamp.extend();
+            // Check if goal is detected
+            bool detected = AutoClamp::isDetected();
+
+            // If goal is detected
+            if (detected)
+            {
+                // Increment the detection counter if conditions are met
+                goalDetected++;
+            }
+            else
+            {
+                // Reset the detection counter if the conditions are not met
+                goalDetected = 0;
+            }
+
+            // If goal is detected enough times and clamp is up
+            if (goalDetected >= Goal::MIN_DETECTION && !clamp.is_extended())
+            {
+                // Extend the clamp
+                clamp.extend();
+            }
         }
 
         // Delay to save resources
         pros::delay(20);
+        
     }
 }    

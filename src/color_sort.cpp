@@ -88,15 +88,20 @@ bool ColorSort::waitUntilDetected(int msecTimeout, int hue) {
     return ringDetected >= Ring::MIN_RING_DETECTION;
 }
 
-void ColorSort::toggleActive() {
-    // Toggle the active state of the color sorter if auto-redirect color has been set
-    
-    if(autoRedirectHue == Hue::ANY) {
+void ColorSort::setActive(bool active) {
+    if(autoRedirectHue == Hue::ANY && active != isEnabled()) {
         pros::lcd::print(1, "WARN: AutoRedirect toggle blocked b/c color not set");
     }
     else {
-        isActive = !isActive;
+        isActive = active;
     }
+}
+
+void ColorSort::enable() {
+    setActive(true);
+}
+void ColorSort::disable() {
+    setActive(false);
 }
 
 // Set the auto-redirect color for the color sorter
@@ -120,14 +125,14 @@ int ColorSort::getRedirectHue() {
 int ColorSort::getIntakeHue() {
     return autoIntakeHue;
 }
-bool ColorSort::getActive() {
+bool ColorSort::isEnabled() {
     return isActive;
 }
 
 void color_sort_task(void *param){
 
     while(true){
-        if(color_sort.getActive()){
+        if(color_sort.isEnabled()){
             
             if(color_sort.isDetected(color_sort.getRedirectHue())){
                 redirect.extend();
