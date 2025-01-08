@@ -114,15 +114,25 @@ void ColorSort::setAutoRedirect(int hue) {
     
 }
 
+int ColorSort::getRedirectHue() {
+    return autoRedirectHue;
+}
+int ColorSort::getIntakeHue() {
+    return autoIntakeHue;
+}
+bool ColorSort::getActive() {
+    return isActive;
+}
+
 void color_sort_task(void *param){
 
     while(true){
-        if(ColorSort::isActive){
+        if(color_sort.getActive()){
             
-            if(color_sort.isDetected(ColorSort::autoRedirectHue)){
+            if(color_sort.isDetected(color_sort.getRedirectHue())){
                 redirect.extend();
             }
-            else if(color_sort.isDetected(ColorSort::autoIntakeHue)){
+            else if(color_sort.isDetected(color_sort.getIntakeHue())){
                 redirect.retract();
             }
         }

@@ -19,17 +19,20 @@ private:
     int lastBlueDetection;
     int lastAnyDetection;
     int wrapHue(int hue);
-
-public:
     static bool isActive;
     static int autoRedirectHue;
     static int autoIntakeHue;
+public:
     ColorSort();
     int getLastDetection(int hue = Hue::ANY) const;
     bool isDetected(int hue = Hue::ANY);
     bool waitUntilDetected(int msecTimeout, int hue = Hue::ANY);
     void toggleActive();
+    bool getActive();
     void setAutoRedirect(int hue);
+    int getRedirectHue();
+    int getIntakeHue();
+
 };
 
 #endif // COLOR_SORT_H
