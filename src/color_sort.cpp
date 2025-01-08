@@ -4,41 +4,40 @@
 #include "color_sort.h"
 #include "devices.h"
 
-int Hue::lastDetection = 0;
-int Hue::wrapHue(int hue){
-    return (hue + 360) % 360;
+double Hue::wrapHue(double hue) {
+    return fmod(hue + 360.0, 360.0);
 }
-Hue::Hue(int hue) : hue(hue) {}
-int Hue::getHue() const{
+Hue::Hue(double hue) : hue(hue), lastDetection(pros::millis()) {}
+double Hue::getHue() const {
     return hue;
 }
-int Hue::min() const{
-    return wrapHue(hue-RingConfig::HUE_RANGE);
+double Hue::min() const {
+    return wrapHue(hue - RingConfig::HUE_RANGE);
 }
-int Hue::max() const{
-    return wrapHue(hue+RingConfig::HUE_RANGE);
+double Hue::max() const {
+    return wrapHue(hue + RingConfig::HUE_RANGE);
 }
-bool Hue::inRange(int sensorHue) const{
+bool Hue::inRange(double sensorHue) const {
     if (min() <= max()) {
         return (sensorHue >= min() && sensorHue <= max());
     } else {
         return (sensorHue >= min() || sensorHue <= max());
     }
 }
-int Hue::getLastDetection(){
+int Hue::getLastDetection() {
     return lastDetection;
 }
-void Hue::setLastDetection(int time){
+void Hue::setLastDetection(int time) {
     lastDetection = time;
 }
-bool Hue::equals(const Hue& hue){
+bool Hue::equals(const Hue& hue) {
     return this->hue == hue.getHue();
 }
 
 namespace RingColor {
-    Hue red(0);
-    Hue blue(210);
-    Hue any(-1);
+    Hue red(0.0);
+    Hue blue(210.0);
+    Hue any(-1.0);
 }
 
 namespace RingConfig {
@@ -57,7 +56,7 @@ int ColorSort::getLastDetection(Hue hue) const {
 bool ColorSort::isDetected(Hue hue) {
 
 
-    int currentHue = ringSens.get_hue(); // Get the current hue value from the sensor
+    double currentHue = ringSens.get_hue(); // Get the current hue value from the sensor
     int currentDist = ringSens.get_proximity(); // Get the current proximity value from the sensor
 
     // Determine if the current hue falls within the valid range, considering wrapping around 360 degrees
