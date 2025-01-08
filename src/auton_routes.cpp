@@ -1,6 +1,7 @@
 #include "auton_routes.h"
 #include "auto_clamp.h"
 #include "lemlib/chassis/chassis.hpp"
+#include "lemlib/pose.hpp"
 #include "main.h"
 #include "lemlib/api.hpp" // IWYU pragma: keep
 #include "pros/misc.h"
@@ -68,7 +69,17 @@ void endSection(int delay)
 void progSkills(bool isRedTeam){
     
 }
-void RingRush(bool isRedTeam){
+
+enum RingRushMode{
+
+    ALLIANCE_STAKE,
+    TOUCH_MID,
+    FACE_CORNER,
+    PLACE_CORNER
+
+};
+
+void RingRush(bool isRedTeam, RingRushMode mode){
 
     // 6 ring on one goal ringside route
     if(isRedTeam){
@@ -114,6 +125,7 @@ void RingRush(bool isRedTeam){
         intake.move(127);
         chassis.moveToPoint(-24,56,2000,{.maxSpeed=50},false);
         intake.brake();
+        // TODO: STOP IF BLUE INTAKED
 
         // * Corner
         Pose corner(-65,65,-45);
@@ -161,25 +173,38 @@ void RingRush(bool isRedTeam){
         redirect.retract();
         chassis.waitUntilDone();
 
-        // * OPTIONAL: Positive Corner
-        // THIS NEEDS TO BE TOGGLED ON/OFF DEPENDING ON THE ALLIANCE
-        if(false){
+        // This is where the route splits into different modes
+        // depending on alliances and strategies
+
+        if(mode == RingRushMode::ALLIANCE_STAKE){
+            // * ALLIANCE STAKE
+            Pose stake(-63,0,270);
+            chassis.moveToPose(stake.x,stake.y,stake.theta,3000,{.minSpeed=20});
+            oc.move(OCPos::HIGH);
+            oc.waitUntilDone();
+        }
+        else if(mode == RingRushMode::TOUCH_MID){
+            Pose ladder(-10,0,90);
+            oc_piston.extend();
+            chassis.moveToPose(ladder.x,ladder.y,ladder.theta,3000,{.maxSpeed=50,.minSpeed=20});
+        }
+        else{
             Pose posCorner(-65,-65,45);
-            bool allianceClearsCorner = false;
-            if(allianceClearsCorner){
+            if (mode == RingRushMode::FACE_CORNER){
+                chassis.moveToPose(posCorner.x,posCorner.y+5,180,1000,{.minSpeed=70},false);
+            }
+            else if(mode == RingRushMode::PLACE_CORNER){
                 chassis.turnToPoint(posCorner.x,posCorner.y,1000,{.forwards=false},false);
                 chassis.moveToPose(posCorner.x,posCorner.y,posCorner.theta,1000,{.forwards=false,.minSpeed=70},false);
             }
-            else{
-                chassis.moveToPose(posCorner.x,posCorner.y+5,180,1000,{.minSpeed=70},false);
-            }
-        }
 
+        }
     }
     else{
 
     }
 }
+
 void GoalRush(bool isRedTeam){
 
     if(isRedTeam){
