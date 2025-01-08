@@ -111,34 +111,6 @@ void oc_control_task(void *param)
     }
 }
 
-/*
-void initialize_oc_position()
-{
-    // Move oc down at moderate speed but low power
-    oc_motor.set_voltage_limit(10); // Limit to 4V for gentle movement
-    oc_motor.move_velocity(-50);      // Move down at moderate speed
-    oc_motor.set_brake_mode_all(E_MOTOR_BRAKE_HOLD);
-
-    // Wait until oc stalls (high current, low velocity)
-    while (true)
-    {
-        // Get current draw and velocity
-        double velocity = oc_motor.get_actual_velocity();
-        int current = oc_motor.get_current_draw();
-
-        // If we detect high current (stall) and low velocity, we've hit bottom
-        if (current > 1500 && std::abs(velocity) < 5)
-        {
-            oc_motor.brake();
-            oc_motor.set_voltage_limit(12000); // Reset to full voltage
-            ocRot.reset_position();
-            break;
-        }
-
-        pros::delay(20); // Small delay to prevent hogging CPU
-    }
-}*/
-
 // initialize function. Runs on program startup
 void initialize()
 {
