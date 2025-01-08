@@ -116,3 +116,14 @@ void auto_clamp_task(void *param)
         
     }
 }    
+
+// Display all the information about the autoclamp mechanism on the LCD screen on lines 1-7
+void auto_clamp_screen_task(void *param) {
+    while (true) {
+        pros::lcd::print(1, "Goal Detected: %s", auto_clamp.isDetected() ? "True" : "False");
+        pros::lcd::print(2, "Goal Clamped: %s", auto_clamp.isGoalClamped() ? "True" : "False");
+        pros::lcd::print(3, "Auto Clamp Enabled: %s", auto_clamp.isEnabled() ? "True" : "False");
+        pros::lcd::print(4, "Clamp State: %s", clamp.is_extended() ? "Extended" : "Retracted");
+        pros::delay(100);
+    }
+}

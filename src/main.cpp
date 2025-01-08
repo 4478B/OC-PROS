@@ -11,106 +11,6 @@
 #include "auton_selector.h"
 #include "testing.h"
 
-// Global variables needed for oc control
-int ocMove = NONE;
-const double OC_GOAL_THRESHOLD = 3; // one-sided degree range considered "in goal"
-const double OC_POSITION_LOW = 338; // position of low 
-const double OC_POSITION_HIGH = 110; // position of high
-const double OC_MAX_TORQUE = 999;
-
-
-// Task function for oc control
-// NOTE: as arm moves up, angle decreases!!
-void oc_control_task(void *param)
-{
-    double currentPos;
-    double error;
-    double nextMovement;
-    int goalCount = 0;
-
-    while (true)
-    {
-        // pid movement for low movement
-        if (ocMove == LOW)
-        {
-            // current position in centidegrees, convert to degrees
-            currentPos = ocRot.get_angle() / 100.0;
-
-            // normalize error to [-180,180]
-            //currentPos = currentPos - 360 * (currentPos > 240) + 360 * (currentPos < -240);
-
-            // calculate how far oc is from target
-            error = currentPos - OC_POSITION_LOW;
-
-            if (fabs(error) < OC_GOAL_THRESHOLD || oc_motor.get_torque() > OC_MAX_TORQUE)
-            { // goal has been met
-
-                goalCount++;
-                if (goalCount >= 3)
-                {
-                    // reset PID for next usage
-                    ocPID.reset();
-
-                    // stop oc motors in place
-                    oc_motor.set_brake_mode(E_MOTOR_BRAKE_COAST);
-                    oc_motor.brake();
-
-                    // stop running the PID code
-                    ocMove = NONE;
-                    goalCount = 0;
-                }
-            }
-            else
-            { // goal has not been met
-                goalCount = 0;
-                // determine how far to move based on PID
-                nextMovement = ocPID.update(error);
-
-                // clamps movements to [-200,200] (green gearset)
-                nextMovement = std::clamp(nextMovement, -200.0, 200.0);
-            }
-
-            // move oc motors based on PID
-            oc_motor.move_velocity(nextMovement);
-        }
-        // linear driving for high movement
-        else if(ocMove == HIGH){
-
-            currentPos = ocRot.get_angle() / 100.0;
-            // starts out high, approaches 0
-            error = currentPos - OC_POSITION_HIGH;
-
-            if(error > 0){
-                oc_motor.move(127);
-            }
-            else{
-                oc_motor.set_brake_mode(E_MOTOR_BRAKE_HOLD);
-                oc_motor.brake();
-                ocMove = NONE;
-            }
-            
-        }
-        else if(ocMove == NONE){
-            oc_motor.brake();
-        }
-        // in case there is drift
-        /*else if(ocMove == IDLE_LOW){
-        }*/
-        
-        /*
-        pros::lcd::print(6, "oc State: %s", ocMove != NONE ? ocMove == HIGH ? 
-                                                           "HIGH" : "LOW" : "NONE");
-        pros::lcd::print(3, "oc Current Pos: %f", (double) currentPos);
-        pros::lcd::print(4, "oc Target Pos: %f", ocMove != NONE ? ocMove == HIGH ? 
-                                                           OC_POSITION_HIGH : OC_POSITION_LOW : -1);
-        pros::lcd::print(7, "error: %f", error);
-        pros::lcd::print(5, "oc Next Movement: %f", nextMovement);
-        
-        pros::delay(20);
-        */
-    }
-}
-
 // initialize function. Runs on program startup
 void initialize()
 {
@@ -233,18 +133,11 @@ void handleIntake(pros::controller_digital_e_t buttonUp, pros::controller_digita
     
 }
 
-bool returnOC = false; // if oc still needs to return
-
-void handleOCMotor(pros::controller_digital_e_t button)
-{
-    if (controller.get_digital(button))
-    {
-        ocMove = HIGH;
-        returnOC = true;
-    }
-    else if(returnOC){
-        ocMove = LOW;
-        returnOC = false;
+void handleOCMotor(pros::controller_digital_e_t button) {
+    if (controller.get_digital(button)) {
+        overclock_mech.setTargetPos(OCMovement::HIGH_POS, true);
+    } else if (overclock_mech.getReturnLowAfterMove() && !overclock_mech.getIsActive()) {
+        overclock_mech.setTargetPos(OCMovement::LOW_POS, false);
     }
 }
 
@@ -272,7 +165,7 @@ void opcontrol()
         if (!inCompetition) { testAuton(); }
 
         handleDriveTrain();
-        handleIntake(pros::E_CONTROLLER_DIGITAL_R1,pros::E_CONTROLLER_DIGITAL_R2);
+        handleIntake(pros::E_CONTROLLER_DIGITAL_R2,pros::E_CONTROLLER_DIGITAL_R1);
         handleOCMotor(pros::E_CONTROLLER_DIGITAL_L1);
         
         oc_piston.handle();

@@ -3,6 +3,7 @@
 
 // required files for devices
 #include "main.h"
+#include "overclock_mech.h"
 #include "piston.h"
 #include "lemlib/pid.hpp"
 #include "color_sort.h"
@@ -44,5 +45,6 @@ extern ExpoDriveCurve throttle_curve;
 extern Chassis chassis;
 extern ColorSort color_sort;
 extern AutoClamp auto_clamp;
+OverclockMech overclock_mech;
 
 #endif // DEVICES_H

@@ -157,11 +157,6 @@ private:
 };
 
 /**
- * @brief The global overclock mechanism instance.
- */
-extern OverclockMech overclock_mech;
-
-/**
  * @brief The control task for the overclock mechanism.
  * @param param The task parameter.
  */
