@@ -4,66 +4,86 @@
 #include "color_sort.h"
 #include "devices.h"
 
-namespace Hue {
-    const int RED = 0;
-    const int BLUE = 210;
-    const int ANY = -1;
+int Hue::lastDetection = 0;
+int Hue::wrapHue(int hue){
+    return (hue + 360) % 360;
+}
+Hue::Hue(int hue) : hue(hue) {}
+int Hue::getHue() const{
+    return hue;
+}
+int Hue::min() const{
+    return wrapHue(hue-RingConfig::HUE_RANGE);
+}
+int Hue::max() const{
+    return wrapHue(hue+RingConfig::HUE_RANGE);
+}
+bool Hue::inRange(int sensorHue) const{
+    if (min() <= max()) {
+        return (sensorHue >= min() && sensorHue <= max());
+    } else {
+        return (sensorHue >= min() || sensorHue <= max());
+    }
+}
+int Hue::getLastDetection(){
+    return lastDetection;
+}
+void Hue::setLastDetection(int time){
+    lastDetection = time;
+}
+bool Hue::equals(const Hue& hue){
+    return this->hue == hue.getHue();
 }
 
-namespace Ring {
+namespace RingColor {
+    Hue red(0);
+    Hue blue(210);
+    Hue any(-1);
+}
+
+namespace RingConfig {
     const int HUE_RANGE = 10;
     const int MIN_RING_DETECTION = 1;
     const int MAX_RING_DISTANCE = 10;
 }
 
 bool ColorSort::isActive = false;
-int ColorSort::autoRedirectHue = Hue::ANY; // any means no redirect
-int ColorSort::autoIntakeHue = Hue::ANY;
+Hue ColorSort::autoRedirectHue = RingColor::any; // any means no redirect
+Hue ColorSort::autoIntakeHue = RingColor::any;
 
-int ColorSort::getLastDetection(int hue) const {
-    return hue == Hue::ANY ? lastAnyDetection : (hue == Hue::RED ? lastRedDetection : lastBlueDetection);
+int ColorSort::getLastDetection(Hue hue) const {
+    return hue.getLastDetection();
 }
+bool ColorSort::isDetected(Hue hue) {
 
-int ColorSort::wrapHue(int hue) {
-    return (hue + 360) % 360;
-}
 
-bool ColorSort::isDetected(int hue) {
-
-    // Define acceptable hue range based on the desired ring color
-    int hueMin = wrapHue(hue - Ring::HUE_RANGE); // Wrap around to ensure valid range
-    int hueMax = wrapHue(hue + Ring::HUE_RANGE); // Wrap around to ensure valid range
     int currentHue = ringSens.get_hue(); // Get the current hue value from the sensor
     int currentDist = ringSens.get_proximity(); // Get the current proximity value from the sensor
 
     // Determine if the current hue falls within the valid range, considering wrapping around 360 degrees
-    bool inHueRange;
-    if (hueMin <= hueMax) {
-        inHueRange = (currentHue >= hueMin && currentHue <= hueMax);
-    } else {
-        inHueRange = (currentHue >= hueMin || currentHue <= hueMax);
-    }
+    bool inHueRange = hue.inRange(currentHue);
 
-    bool detected = inHueRange && currentDist < Ring::MAX_RING_DISTANCE;
+    bool detected = inHueRange && currentDist < RingConfig::MAX_RING_DISTANCE;
 
     // Update the detection timestamps
     if (detected) {
-        lastAnyDetection = pros::millis();
-        if (hue == Hue::RED) {
-            lastRedDetection = pros::millis();
-        } else {
-            lastBlueDetection = pros::millis();
+        int detectionTime = pros::millis();
+        RingColor::any.setLastDetection(detectionTime);
+        if(hue.equals(RingColor::red)) {
+            RingColor::red.setLastDetection(detectionTime);
+        } 
+        else {
+            RingColor::blue.setLastDetection(detectionTime);
         }
     }
-
     return detected;
 }
 
-bool ColorSort::waitUntilDetected(int msecTimeout, int hue) {
+bool ColorSort::waitUntilDetected(int msecTimeout, Hue hue) {
     int startTime = pros::millis(); // Record the start time of the function
     int ringDetected = 0; // Counter for consecutive ring detections
 
-    while(pros::millis() - startTime < msecTimeout && ringDetected < Ring::MIN_RING_DETECTION) {
+    while(pros::millis() - startTime < msecTimeout && ringDetected < RingConfig::MIN_RING_DETECTION) {
         // Check for ring detection based on the specified color
         bool detected = isDetected(hue);
 
@@ -71,13 +91,15 @@ bool ColorSort::waitUntilDetected(int msecTimeout, int hue) {
             // Increment the detection counter if the conditions are met
             ringDetected++;
             // Update the detection timestamps
-            lastAnyDetection = pros::millis();
-            if (hue == Hue::RED) {
-                lastRedDetection = lastAnyDetection;
+            int detectionTime = pros::millis();
+            RingColor::any.setLastDetection(detectionTime);
+            if(hue.equals(RingColor::red)) {
+                RingColor::red.setLastDetection(detectionTime);
             } else {
-                lastBlueDetection = lastAnyDetection;
+                RingColor::blue.setLastDetection(detectionTime);
             }
-        } else {
+        } 
+        else {
             // Reset the detection counter if the conditions are not met
             ringDetected = 0;
         }
@@ -85,11 +107,11 @@ bool ColorSort::waitUntilDetected(int msecTimeout, int hue) {
         pros::delay(20); // Wait briefly before the next sensor reading to prevent excessive polling
     }
     
-    return ringDetected >= Ring::MIN_RING_DETECTION;
+    return ringDetected >= RingConfig::MIN_RING_DETECTION;
 }
 
 void ColorSort::setActive(bool active) {
-    if(autoRedirectHue == Hue::ANY && active != isEnabled()) {
+    if(autoRedirectHue.equals(RingColor::any) && active != isEnabled()) {
         pros::lcd::print(1, "WARN: AutoRedirect toggle blocked b/c color not set");
     }
     else {
@@ -105,24 +127,24 @@ void ColorSort::disable() {
 }
 
 // Set the auto-redirect color for the color sorter
-void ColorSort::setAutoRedirect(int hue) {
-    if (hue == Hue::ANY) {
+void ColorSort::setAutoRedirect(Hue hue) {
+    if (hue.equals(RingColor::any)) {
         pros::lcd::print(1, "WARN: AutoRedirect disabled b/c color set to any");
         isActive = false;
-        autoRedirectHue = Hue::ANY;
-        autoIntakeHue = Hue::ANY;
+        autoRedirectHue = RingColor::any;
+        autoIntakeHue = RingColor::any;
     }
-    else if (hue == Hue::RED || hue == Hue::BLUE) {
+    else if (hue.equals(RingColor::red) || hue.equals(RingColor::blue)) {
         autoRedirectHue = hue;
-        autoIntakeHue = ColorSort::autoRedirectHue == Hue::RED ? Hue::BLUE : Hue::RED;
+        autoIntakeHue = ColorSort::autoRedirectHue.equals(RingColor::red) ? RingColor::blue : RingColor::red;
     }
     
 }
 
-int ColorSort::getRedirectHue() {
+Hue ColorSort::getRedirectHue() {
     return autoRedirectHue;
 }
-int ColorSort::getIntakeHue() {
+Hue ColorSort::getIntakeHue() {
     return autoIntakeHue;
 }
 bool ColorSort::isEnabled() {

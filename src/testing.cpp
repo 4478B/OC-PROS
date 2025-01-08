@@ -1,4 +1,5 @@
 #include "testing.h"
+#include "color_sort.h"
 #include "lemlib/chassis/chassis.hpp"
 #include "lemlib/api.hpp" // IWYU pragma: keep
 #include "liblvgl/llemu.hpp"
@@ -109,10 +110,10 @@ void testRingSens(int i)
         intake.move(intakeVelocity);
         pros::lcd::clear_line(1);
         pros::lcd::print(1, "Waiting for red...");
-        color_sort.waitUntilDetected(100000,Hue::RED);
+        color_sort.waitUntilDetected(100000,RingColor::red);
         intake.brake();
         pros::lcd::clear_line(1);
-        if(color_sort.isDetected(Hue::RED)){
+        if(color_sort.isDetected(RingColor::red)){
             pros::lcd::print(1, "Got red!");
         }
         else{
@@ -123,10 +124,10 @@ void testRingSens(int i)
         intake.move(intakeVelocity);
         pros::lcd::clear_line(1);
         pros::lcd::print(1, "Waiting for blue...");
-        color_sort.waitUntilDetected(100000,Hue::BLUE);
+        color_sort.waitUntilDetected(100000,RingColor::blue);
         intake.brake();
         pros::lcd::clear_line(1);
-        if(color_sort.isDetected(Hue::BLUE)){
+        if(color_sort.isDetected(RingColor::blue)){
             pros::lcd::print(1, "Got blue!");
         }
         else{

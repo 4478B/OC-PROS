@@ -81,7 +81,7 @@ void RingRush(bool isRedTeam){
         delay(800);
         left_doinker.extend(); // extend
         chassis.waitUntilDone();
-        color_sort.waitUntilDetected(2000,Hue::RED);
+        color_sort.waitUntilDetected(2000,RingColor::red);
         intake.brake();
 
         // * Retreat
@@ -155,7 +155,7 @@ void RingRush(bool isRedTeam){
         chassis.waitUntilDone();
         chassis.moveToPoint(alliance.x,alliance.y-10, 1000,{.maxSpeed=40,.minSpeed=40,.earlyExitRange=5});
         color_sort.waitUntilDetected(1000);
-        if(color_sort.isDetected(Hue::RED)){
+        if(color_sort.isDetected(RingColor::red)){
 
         }
         redirect.retract();

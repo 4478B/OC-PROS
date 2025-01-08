@@ -12,10 +12,7 @@ Piston::Piston(
       button(button),
       controlType(controlType)
 {
-    this->button = button;
-    this->controlType = controlType;
 }
-
 void Piston::handle(bool printing)
 {
     // if corresponding button is pressed
