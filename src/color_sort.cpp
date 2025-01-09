@@ -46,6 +46,8 @@ namespace RingConfig {
     const int MAX_RING_DISTANCE = 10;
 }
 
+ColorSort::ColorSort(){}
+
 bool ColorSort::isActive = false;
 Hue ColorSort::autoRedirectHue = RingColor::any; // any means no redirect
 Hue ColorSort::autoIntakeHue = RingColor::any;

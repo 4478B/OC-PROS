@@ -80,8 +80,9 @@ enum RingRushMode{
 
 };
 
-void RingRush(bool isRedTeam, RingRushMode mode){
+void RingRush(bool isRedTeam){
 
+    int mode = ALLIANCE_STAKE;
     // 6 ring on one goal ringside route
     if(isRedTeam){
 
