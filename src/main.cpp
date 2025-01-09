@@ -10,7 +10,6 @@
 #include "devices.h"
 #include "auton_selector.h"
 #include "testing.h"
-#include "screen.h"
 
 // initialize function. Runs on program startup
 void initialize()
@@ -18,8 +17,6 @@ void initialize()
 
     lcd::initialize();   // initialize the LCD screen on the VEX brain
     chassis.calibrate(); // Calibrates the chassis sensors to ensure accurate readings
-
-    Screen::initializeScreenTask(); // Initialize the screen task
 
     clamp.retract(); // Set the clamp to the high position
     oc_piston.retract(); // Set the oc piston to the low position

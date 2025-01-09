@@ -171,3 +171,16 @@ void color_sort_task(void *param) {
     }
 }
 
+// Display all the information about the colorsort mechanism on the LCD screen on lines 1-7
+void color_sort_screen_task(void *param) {
+    while (true) {
+        pros::lcd::print(1, "Color Sort Active: %s", color_sort.isEnabled() ? "True" : "False");
+        pros::lcd::print(2, "Auto Redirect Hue: %f", color_sort.getRedirectHue().getHue());
+        pros::lcd::print(3, "Auto Intake Hue: %f", color_sort.getIntakeHue().getHue());
+        pros::lcd::print(4, "Current Hue: %f", ringSens.get_hue());
+        pros::lcd::print(5, "Current Proximity: %d", ringSens.get_proximity());
+        pros::lcd::print(6, "Last Detection: %d", color_sort.getLastDetection(RingColor::any));
+        pros::lcd::print(7, "Last Red Detection: %d", color_sort.getLastDetection(RingColor::red));
+        pros::delay(100);
+    }
+}

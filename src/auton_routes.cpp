@@ -8,7 +8,6 @@
 #include "pros/misc.h"
 #include <cstdlib>
 #include "devices.h"
-#include "screen.h"
 #include "testing.h"
 #include <iomanip>
 #include "color_sort.h"
@@ -143,13 +142,13 @@ void RingRush(bool isRedTeam, RingRushMode mode){
         all_motors.move_velocity(40);
         delay(500);
 
-        if(Screen::current_screen == screen_state::TEMP2){
-            pros::lcd::print(1,"x start: %d", chassis.getPose().x);
-            pros::lcd::print(2,"y start: %d", chassis.getPose().y);
-            delay(500);
-            pros::lcd::print(3,"x end: %d", chassis.getPose().x);
-            pros::lcd::print(4,"y end: %d", chassis.getPose().y);
-        }
+        // debug start
+        pros::lcd::print(1,"x start: %d", chassis.getPose().x);
+        pros::lcd::print(2,"y start: %d", chassis.getPose().y);
+        delay(500);
+        pros::lcd::print(3,"x end: %d", chassis.getPose().x);
+        pros::lcd::print(4,"y end: %d", chassis.getPose().y);
+        // debug end
 
         chassis.setPose(cornerReset.x,cornerReset.y,imu.get_heading());
         all_motors.brake();
