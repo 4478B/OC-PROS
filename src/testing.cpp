@@ -226,7 +226,7 @@ void testAuton(bool inputReq)
                   << std::endl;
 
         // THIS IS WHERE YOU CHANGE THE ROUTE YOU'RE TESTING
-        progSkills(1);
+        progSkills();
 
         // stops motors to prevent rogue movements after auton
         left_motors.brake();

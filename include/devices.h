@@ -45,6 +45,6 @@ extern ExpoDriveCurve throttle_curve;
 extern Chassis chassis;
 extern ColorSort color_sort;
 extern AutoClamp auto_clamp;
-extern OverclockMech overclock_mech;
+extern OverclockMech oc_mech;
 
 #endif // DEVICES_H

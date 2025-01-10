@@ -85,4 +85,4 @@ Chassis chassis(drivetrain,         // drivetrain settings
 // create the color sorter
 ColorSort color_sort;
 AutoClamp auto_clamp;
-OverclockMech overclock_mech;
+OverclockMech oc_mech;

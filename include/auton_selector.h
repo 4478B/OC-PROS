@@ -15,6 +15,8 @@ private:
     int currentSelection;
 
 public:
+
+    bool isRedTeam;
     // Constructor
     AutonSelector(const AutonRoutine* routinesArray, size_t routineCount, bool combineTesting = false, const AutonRoutine* extraRoutinesArray = nullptr, size_t extraCount = 0);
 
@@ -26,6 +28,7 @@ public:
     void prevSelection();
     void nextSelection();
     bool setSelection(int newSelection);
+    void toggleDisplayTeam();
 
     // Execution method
     void runSelection();
@@ -43,6 +46,7 @@ extern AutonSelector testingSelector;
 
 // Function declarations
 void on_left_button();
+void on_center_button();
 void on_right_button();
 
 #endif // AUTON_SELECTOR_H

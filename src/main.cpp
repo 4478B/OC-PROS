@@ -1,5 +1,6 @@
 #include "main.h"
 #include "lemlib/api.hpp" // IWYU pragma: keep
+#include "lemlib/chassis/chassis.hpp"
 #include "lemlib/pid.hpp"
 #include "liblvgl/llemu.hpp"
 #include "overclock_mech.h"
@@ -74,6 +75,7 @@ void competition_initialize()
 
     // assign buttons to actions in auton selector
     lcd::register_btn0_cb(on_left_button);
+    lcd::register_btn1_cb(on_center_button);
     lcd::register_btn2_cb(on_right_button);
 }
 
@@ -117,7 +119,6 @@ void handleDriveTrain()
 
 void handleIntake(pros::controller_digital_e_t buttonUp, pros::controller_digital_e_t buttonDown)
 {
-
     // intake
     if (controller.get_digital(buttonUp))
     {
@@ -138,10 +139,10 @@ void handleIntake(pros::controller_digital_e_t buttonUp, pros::controller_digita
 bool returnOC = false;
 void handleOCMotor(pros::controller_digital_e_t button) {
     if (controller.get_digital(button)) {
-        overclock_mech.setTargetPos(OCMovement::HIGH_POS);
+        oc_mech.setTargetPos(OCMovement::HIGH_POS);
         returnOC = true;
     } else if (returnOC) {
-        overclock_mech.setTargetPos(OCMovement::LOW_POS);
+        oc_mech.setTargetPos(OCMovement::LOW_POS);
     }
 }
 

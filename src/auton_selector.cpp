@@ -2,12 +2,14 @@
 #include "auton_routes.h"
 #include "testing.h"
 #include "devices.h"
+#include "main.h"
+#include <variant>
 
 // Define the AutonRoutine structure
 struct AutonRoutine {
     std::string displayName;
-    std::function<void(bool)> func;
-    bool parameter = true;
+    std::variant<std::function<void()>, std::function<void(int)>> func;
+    int parameter = 0;
 };
 
 // Constructor
@@ -15,7 +17,7 @@ AutonSelector::AutonSelector(const AutonRoutine* routinesArray, size_t routineCo
 
     // Add main routines
     for (size_t i = 0; i < routineCount; i++) {
-        if (routinesArray[i].func == nullptr) {
+        if (routinesArray[i].func.index() == std::variant_npos) {
             pros::lcd::clear_line(3);
             pros::lcd::print(3, "Routine %d has null function", i);
         }
@@ -25,14 +27,15 @@ AutonSelector::AutonSelector(const AutonRoutine* routinesArray, size_t routineCo
     // Add extra routines if required
     if (combineTesting && extraRoutinesArray != nullptr) {
         for (size_t i = 0; i < extraCount; i++) {
-            if (extraRoutinesArray[i].func == nullptr) {
+            if (extraRoutinesArray[i].func.index() == std::variant_npos) {
                 pros::lcd::clear_line(3);
                 pros::lcd::print(3, "Extra routine %d has null function", i);
             }
             routines.push_back(extraRoutinesArray[i]);
         }
     }
-
+    isRedTeam = false;
+    competitionSelector.toggleDisplayTeam();
 }
 
 // Method implementations
@@ -52,6 +55,10 @@ void AutonSelector::prevSelection() {
 
 void AutonSelector::nextSelection() {
     currentSelection = (currentSelection + 1) % routines.size();
+}
+void AutonSelector::toggleDisplayTeam(){
+    isRedTeam = !isRedTeam;
+    pros::lcd::print(1, "%s", competitionSelector.isRedTeam ? "RED" : "BLUE");
 }
 
 bool AutonSelector::setSelection(int newSelection) {
@@ -73,8 +80,10 @@ void AutonSelector::runSelection() {
 
     const AutonRoutine& selectedRoutine = routines[currentSelection];
 
-    if (selectedRoutine.func) {
-        selectedRoutine.func(selectedRoutine.parameter);
+    if (auto func = std::get_if<std::function<void()>>(&selectedRoutine.func)) {
+        (*func)();
+    } else if (auto func = std::get_if<std::function<void(int)>>(&selectedRoutine.func)) {
+        (*func)(selectedRoutine.parameter);
     }
 }
 
@@ -84,7 +93,13 @@ int AutonSelector::getRoutineCount() const {
 
 // Global object definitions
 const AutonRoutine COMPETITION_ROUTINES[] = {
-    {"Route 1", progSkills, true}
+    {"Prog Skills", progSkills},
+    {"Safe AWP Left", safeAWP, 1},
+    {"Safe AWP Right", safeAWP, 2},
+    {"Ring Rush Alliance", ringRush, 1},
+    {"Ring Rush Touch Mid", ringRush, 2},
+    {"Ring Rush Face Corner", ringRush, 3},
+    {"Ring Rush Place Corner", ringRush, 4}
 };
 
 const AutonRoutine TESTING_ROUTINES[] = {
@@ -99,6 +114,10 @@ AutonSelector testingSelector(TESTING_ROUTINES, sizeof(TESTING_ROUTINES) / sizeo
 void on_left_button() {
     competitionSelector.prevSelection();
     competitionSelector.displaySelectionBrain();
+}
+
+void on_center_button() {
+    competitionSelector.toggleDisplayTeam();
 }
 
 void on_right_button() {

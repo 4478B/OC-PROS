@@ -1,5 +1,6 @@
 #include "auton_routes.h"
 #include "auto_clamp.h"
+#include "auton_selector.h"
 #include "lemlib/chassis/chassis.hpp"
 #include "lemlib/pose.hpp"
 #include "main.h"
@@ -67,22 +68,15 @@ void endSection(int delay)
 // This file includes all of the routes coded in PROS for our robot
 // The routes should have linked path.jerryio files for reference
 
-void progSkills(bool isRedTeam){
+bool isRedTeam = competitionSelector.isRedTeam;
+
+void progSkills(){
     
 }
 
-enum RingRushMode{
 
-    ALLIANCE_STAKE,
-    TOUCH_MID,
-    FACE_CORNER,
-    PLACE_CORNER
 
-};
-
-void RingRush(bool isRedTeam){
-
-    int mode = ALLIANCE_STAKE;
+void ringRush(int mode){
     // 6 ring on one goal ringside route
     if(isRedTeam){
 
@@ -94,7 +88,8 @@ void RingRush(bool isRedTeam){
         delay(800);
         left_doinker.extend(); // extend
         chassis.waitUntilDone();
-        color_sort.waitUntilDetected(2000,RingColor::red);
+        delay(500);
+        //color_sort.waitUntilDetected(2000,RingColor::red);
         intake.brake();
 
         // * Retreat
@@ -106,20 +101,20 @@ void RingRush(bool isRedTeam){
         Pose goal(-24,24,0);
         chassis.swingToPoint(goal.x, goal.y, lemlib::DriveSide::RIGHT,1000,{.direction=lemlib::AngularDirection::CCW_COUNTERCLOCKWISE},false);
         chassis.moveToPoint(goal.x, goal.y,1000,{.forwards=false});
-        while(chassis.isInMotion() && !auto_clamp.isDetected()){
-            delay(20);
-        }
+        //while(chassis.isInMotion() && !auto_clamp.isDetected()){
+        //    delay(20);
+        //}
         clamp.extend();
         delay(50);
         // switch to primitive control if odom fails
-        if(!auto_clamp.isGoalClamped()){
+        /*if(!auto_clamp.isGoalClamped()){
             clamp.retract();
             all_motors.move_velocity(-50);
             auto_clamp.waitUntilClamp(10,1000);
             clamp.extend();
             delay(50);
             all_motors.brake();
-        }
+        }*/
         chassis.waitUntilDone();
 
         // * Safe
@@ -130,7 +125,7 @@ void RingRush(bool isRedTeam){
         // TODO: STOP IF BLUE INTAKED
 
         // * Corner
-        Pose corner(-65,65,-45);
+        /*Pose corner(-65,65,-45);
         chassis.moveToPose(corner.x,corner.y,corner.theta,1000,{.minSpeed=20});
         while(chassis.isInMotion() && chassis.getPose().distance(corner) > 6){
             delay(20);
@@ -152,7 +147,7 @@ void RingRush(bool isRedTeam){
         // debug end
 
         chassis.setPose(cornerReset.x,cornerReset.y,imu.get_heading());
-        all_motors.brake();
+        all_motors.brake();*/
 
         // * Preload
         Pose preload(-55,42,0);
@@ -168,34 +163,33 @@ void RingRush(bool isRedTeam){
         redirect.extend();
         chassis.waitUntilDone();
         chassis.moveToPoint(alliance.x,alliance.y-10, 1000,{.maxSpeed=40,.minSpeed=40,.earlyExitRange=5});
-        color_sort.waitUntilDetected(1000);
-        if(color_sort.isDetected(RingColor::red)){
 
-        }
-        redirect.retract();
+        //color_sort.waitUntilDetected(1000);
+        //redirect.retract();
         chassis.waitUntilDone();
+        intake.brake();
 
         // This is where the route splits into different modes
         // depending on alliances and strategies
 
-        if(mode == RingRushMode::ALLIANCE_STAKE){
+        if(mode == 1){
             // * ALLIANCE STAKE
             Pose stake(-63,0,270);
             chassis.moveToPose(stake.x,stake.y,stake.theta,3000,{.minSpeed=20});
-            overclock_mech.setTargetPos(OCMovement::HIGH_POS,false);
-            overclock_mech.waitUntilDone(1000);
+            oc_mech.setTargetPos(OCMovement::HIGH_POS);
+            oc_mech.waitUntilDone(1000);
         }
-        else if(mode == RingRushMode::TOUCH_MID){
+        else if(mode == 2){
             Pose ladder(-10,0,90);
             oc_piston.extend();
             chassis.moveToPose(ladder.x,ladder.y,ladder.theta,3000,{.maxSpeed=50,.minSpeed=20});
         }
         else{
             Pose posCorner(-65,-65,45);
-            if (mode == RingRushMode::FACE_CORNER){
+            if (mode == 3){
                 chassis.moveToPose(posCorner.x,posCorner.y+5,180,1000,{.minSpeed=70},false);
             }
-            else if(mode == RingRushMode::PLACE_CORNER){
+            else if(mode == 4){
                 chassis.turnToPoint(posCorner.x,posCorner.y,1000,{.forwards=false},false);
                 chassis.moveToPose(posCorner.x,posCorner.y,posCorner.theta,1000,{.forwards=false,.minSpeed=70},false);
             }
@@ -207,7 +201,19 @@ void RingRush(bool isRedTeam){
     }
 }
 
-void GoalRush(bool isRedTeam){
+void safeAWP(int mode){
+    if(mode == 1){
+        // * LEFT SIDE
+
+    }
+    else{
+        // * RIGHT SIDE
+
+    }
+}
+
+
+void GoalRush(){
 
     if(isRedTeam){
 
@@ -216,7 +222,7 @@ void GoalRush(bool isRedTeam){
 
     }
 }
-void ringAWP(bool isRedTeam){
+void ringAWP(){
     if(isRedTeam){
 
     }
@@ -224,7 +230,7 @@ void ringAWP(bool isRedTeam){
 
     }
 }
-void goalAWP(bool isRedTeam){
+void goalAWP(){
     if(isRedTeam){
 
     }

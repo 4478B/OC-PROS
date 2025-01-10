@@ -9,21 +9,13 @@ namespace OCConfig {
     const double MAX_TORQUE = 999;
 }
 
-OCPos::OCPos(int angle, lemlib::AngularDirection direction, bool isUsingPID, pros::motor_brake_mode_e_t brakeMode)
+OCPos::OCPos(double angle, lemlib::AngularDirection direction, bool isUsingPID, pros::motor_brake_mode_e_t brakeMode)
     : angle(angle), direction(direction), isUsingPID(isUsingPID), brakeMode(brakeMode) {}
 
 double OCPos::getAngle() { return angle; }
 lemlib::AngularDirection OCPos::getDirection() { return direction; }
 double OCPos::getDistanceBetween(double angleDeg) { return angle - angleDeg; }
-bool OCPos::isGoalMet(double currentPos) {
-    double error = getDistanceBetween(currentPos);
-    if (!isUsingPID) {
-        if (direction == lemlib::AngularDirection::CW_CLOCKWISE) return error < 0;
-        if (direction == lemlib::AngularDirection::CCW_COUNTERCLOCKWISE) return error > 0;
-        if (direction == lemlib::AngularDirection::AUTO) return fabs(error) < OCConfig::GOAL_THRESHOLD;
-    }
-    return fabs(error) < OCConfig::GOAL_THRESHOLD;
-}
+
 bool OCPos::equals(OCPos pos) { return angle == pos.getAngle(); }
 pros::motor_brake_mode_e OCPos::getBrakeMode() { return brakeMode; }
 bool OCPos::getIsUsingPID() { return isUsingPID; }
@@ -47,10 +39,9 @@ void OverclockMech::disable() { setActive(false); }
 void OverclockMech::setActive(bool active) {
     if (isActive != active) {
         isActive = active;
-        if (active) {
-            //oc_motor.set_brake_mode(targetPos.getBrakeMode());
-            if (targetPos.getIsUsingPID()) ocPID.reset();
-        } else {
+        oc_motor.set_brake_mode(targetPos.getBrakeMode());
+        if (targetPos.getIsUsingPID()) ocPID.reset();
+        else {
             oc_motor.brake();
         }
     }
@@ -61,10 +52,20 @@ void OverclockMech::setTargetPos(OCPos targetPosition) {
         disable();
     } else {
         targetPos = targetPosition;
-        //oc_motor.set_brake_mode(targetPos.getBrakeMode());
         if (!isActive) enable();
     }
 }
+bool OverclockMech::isGoalMet(double error) {
+    
+    if (!getTargetPos().getIsUsingPID()) {
+        lemlib::AngularDirection direction = getTargetPos().getDirection();
+        if (direction == lemlib::AngularDirection::CW_CLOCKWISE) return error < 0;
+        if (direction == lemlib::AngularDirection::CCW_COUNTERCLOCKWISE) return error > 0;
+        if (direction == lemlib::AngularDirection::AUTO) return fabs(error) < OCConfig::GOAL_THRESHOLD;
+    }
+    return fabs(error) < OCConfig::GOAL_THRESHOLD;
+}
+
 OCPos OverclockMech::getTargetPos() { return targetPos; }
 double OverclockMech::getCurrentPos() { return ocRot.get_angle() / 100.0; }
 bool OverclockMech::waitUntilDone(int msecTimeout) {
@@ -76,34 +77,34 @@ bool OverclockMech::waitUntilDone(int msecTimeout) {
 }
 
 void oc_control_task(void* param) {
-    int goalCount = 0;
-    while (overclock_mech.getIsActive()) {
-        if (overclock_mech.getTargetPos().isGoalMet(overclock_mech.getCurrentPos()) || oc_motor.get_torque() > OCConfig::MAX_TORQUE) {
-            goalCount++;
-            if (goalCount >= OCConfig::GOAL_THRESHOLD) {
+    
+    while (oc_mech.getIsActive()) {
+
+        oc_mech.error = oc_mech.getTargetPos().getDistanceBetween(oc_mech.getCurrentPos());
+
+        if (oc_mech.isGoalMet(oc_mech.error) || oc_motor.get_torque() > OCConfig::MAX_TORQUE) {
+            oc_mech.goalCount++;
+            if (oc_mech.goalCount >= OCConfig::GOAL_THRESHOLD) {
                 ocPID.reset();
-                //oc_motor.set_brake_mode(overclock_mech.getTargetPos().getBrakeMode());
                 oc_motor.brake();
-                overclock_mech.disable();
-                goalCount = 0;
-                if (overclock_mech.getReturnLowAfterMove()) {
-                    overclock_mech.setTargetPos(OCMovement::LOW_POS, false);
-                }
+                oc_mech.goalCount = 0;
+                oc_mech.disable();
+                
             }
         } else {
-            goalCount = 0;
-            double error = overclock_mech.getTargetPos().getDistanceBetween(overclock_mech.getCurrentPos());
+            oc_mech.goalCount = 0;
+            double error = oc_mech.getTargetPos().getDistanceBetween(oc_mech.getCurrentPos());
             pros::lcd::print(5, "Error: %f", error);
-            if (overclock_mech.getTargetPos().getIsUsingPID()) {
+            if (oc_mech.getTargetPos().getIsUsingPID()) {
                 double nextMovement = ocPID.update(error);
                 nextMovement = std::clamp(nextMovement, -200.0, 200.0);
                 //oc_motor.move_velocity(nextMovement);
             } else {
-                if (overclock_mech.getTargetPos().getAngularDirection() == AngularDirection::AUTO) {
+                if (oc_mech.getTargetPos().getAngularDirection() == AngularDirection::AUTO) {
                     pros::lcd::print(1, "ERROR: AUTO DIRECTION NOT SUPPORTED");
-                } else if (overclock_mech.getTargetPos().getAngularDirection() == AngularDirection::CW_CLOCKWISE) {
+                } else if (oc_mech.getTargetPos().getAngularDirection() == AngularDirection::CW_CLOCKWISE) {
                     //oc_motor.move(-40);
-                } else if (overclock_mech.getTargetPos().getAngularDirection() == AngularDirection::CCW_COUNTERCLOCKWISE) {
+                } else if (oc_mech.getTargetPos().getAngularDirection() == AngularDirection::CCW_COUNTERCLOCKWISE) {
                     //oc_motor.move(40);
                 }
             }
@@ -113,14 +114,15 @@ void oc_control_task(void* param) {
 // Display all the information about the overclock mechanism on the LCD screen on lines 1-7
 void oc_screen_task(void* param) {
     while (true) {
-        pros::lcd::print(1, "OC Pos: %f", overclock_mech.getTargetPos().getAngle());
-        pros::lcd::print(2, "OC Current: %f", overclock_mech.getCurrentPos());
-        pros::lcd::print(3, "OC Active: %s", overclock_mech.getIsActive() ? "YES" : "NO");
-        pros::lcd::print(4, "OC Return Low: %s", overclock_mech.getReturnLowAfterMove() ? "YES" : "NO");
-        pros::lcd::print(5,"OC isGoalMet %s" , overclock_mech.getTargetPos().isGoalMet(overclock_mech.getCurrentPos()) ? "YES" : "NO");
-        //pros::lcd::print(5, "OC Brake Mode: %s", overclock_mech.getTargetPos().getBrakeMode() == pros::E_MOTOR_BRAKE_HOLD ? "HOLD" : "COAST");
-        pros::lcd::print(6, "OC Using PID: %s", overclock_mech.getTargetPos().getIsUsingPID() ? "YES" : "NO");
-        pros::lcd::print(7, "OC Direction: %s", overclock_mech.getTargetPos().getAngularDirection() == AngularDirection::AUTO ? "AUTO" : overclock_mech.getTargetPos().getAngularDirection() == AngularDirection::CW_CLOCKWISE ? "CW" : "CCW");
+        pros::lcd::print(1, "OC Target: %f", oc_mech.getTargetPos().getAngle());
+        pros::lcd::print(2, "OC Current: %f", oc_mech.getCurrentPos());
+        pros::lcd::print(3, "OC Active: %s", oc_mech.getIsActive() ? "YES" : "NO");
+        pros::lcd::print(4, "OC Torque: %f", oc_motor.get_torque());
+        pros::lcd::print(5,"OC isGoalMet %s" , oc_mech.isGoalMet(oc_mech.error) ? "YES" : "NO");
+        pros::lcd::print(6,"OC Error %f", oc_mech.error);
+        //pros::lcd::print(5, "OC Brake Mode: %s", oc_mech.getTargetPos().getBrakeMode() == pros::E_MOTOR_BRAKE_HOLD ? "HOLD" : "COAST");
+        //pros::lcd::print(6, "OC Direction: %s", oc_mech.getTargetPos().getAngularDirection() == AngularDirection::AUTO ? "AUTO" : oc_mech.getTargetPos().getAngularDirection() == AngularDirection::CW_CLOCKWISE ? "CW" : "CCW");
+        pros::lcd::print(7, "OC Using PID: %s", oc_mech.getTargetPos().getIsUsingPID() ? "YES" : "NO");
         pros::delay(100);
     }
 }

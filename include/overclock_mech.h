@@ -21,7 +21,7 @@ public:
      * @param isUsingPID Whether PID control is used.
      * @param brakeMode The motor brake mode.
      */
-    OCPos(int angle, lemlib::AngularDirection direction, bool isUsingPID, pros::motor_brake_mode_e_t brakeMode);
+    OCPos(double angle, lemlib::AngularDirection direction, bool isUsingPID, pros::motor_brake_mode_e_t brakeMode);
 
     /**
      * @brief Get the angle.
@@ -41,13 +41,6 @@ public:
      * @return The distance between the angles.
      */
     double getDistanceBetween(double angleDeg);
-
-    /**
-     * @brief Check if the goal is met based on the current position.
-     * @param currentPos The current position.
-     * @return True if the goal is met, false otherwise.
-     */
-    bool isGoalMet(double currentPos);
 
     /**
      * @brief Check if two OCPos objects are equal.
@@ -120,11 +113,17 @@ public:
     bool getIsActive();
 
     /**
+     * @brief Check if the goal is met based on the current position.
+     * @param error The current error.
+     * @return True if the goal is met, false otherwise.
+     */
+    bool isGoalMet(double error);
+
+    /**
      * @brief Set the target position for the overclock mechanism.
      * @param targetPosition The target position.
-     * @param returnLowAfterMove Whether to return to low position after move.
      */
-    void setTargetPos(OCPos targetPosition, bool returnLowAfterMove);
+    void setTargetPos(OCPos targetPosition);
 
     /**
      * @brief Get the target position of the overclock mechanism.
@@ -139,21 +138,19 @@ public:
     double getCurrentPos();
 
     /**
-     * @brief Get whether to return to low position after move.
-     * @return True if returning to low position after move, false otherwise.
-     */
-    bool getReturnLowAfterMove();
-
-    /**
      * @brief Wait until the overclock mechanism is done.
      * @param msecTimeout The timeout in milliseconds.
      * @return True if done, false otherwise.
      */
     bool waitUntilDone(int msecTimeout);
+
+    int goalCount; /**< The goal count. */
+    double error; /**< The error. */
+    
 private:
-    bool returnLowAfterMove; /**< Whether to return to low position after move. */
     OCPos targetPos; /**< The target position. */
     bool isActive; /**< The active state. */
+    
 };
 
 /**
