@@ -15,7 +15,7 @@
 // Global variables needed for oc control
 int ocMove = NONE;
 const double OC_GOAL_THRESHOLD = 3; // one-sided degree range considered "in goal"
-const double OC_POSITION_LOW = 338; // position of low 
+const double OC_POSITION_LOW = 335; // position of low 
 const double OC_POSITION_HIGH = 110; // position of high
 const double OC_MAX_TORQUE = 999;
 
