@@ -1,13 +1,13 @@
 #include "devices.h"
-#include "overclock_mech.h"
 
 
 // controller definition
 Controller controller(pros::E_CONTROLLER_MASTER);
 
 // motor definitions
-MotorGroup left_motors({-2, -4, 11}, pros::MotorGearset::blue);
-MotorGroup right_motors({3, -8, 0}, pros::MotorGearset::blue);
+// goes front to back
+MotorGroup left_motors({-6, -18, 4}, pros::MotorGearset::blue);
+MotorGroup right_motors({2, -9, 5}, pros::MotorGearset::blue);
 MotorGroup all_motors({-2,-4,-11,3,8,9},pros::MotorGearset::blue);
 
 Motor intake(1, pros::MotorGearset::blue);
@@ -16,16 +16,26 @@ Motor oc_motor(10, pros::MotorGearset::green);
 Rotation ocRot(19);
 PID ocPID(.7, 0, .4);
 
-Piston oc_piston('A',false, pros::E_CONTROLLER_DIGITAL_L2);
-Piston clamp('B', false, pros::E_CONTROLLER_DIGITAL_B);
-Piston left_doinker('C',false, pros::E_CONTROLLER_DIGITAL_LEFT);
-Piston right_doinker('D',false, pros::E_CONTROLLER_DIGITAL_RIGHT);
-Piston redirect('E',false, pros::E_CONTROLLER_DIGITAL_DOWN);
+Piston oc_piston('A',false, pros::E_CONTROLLER_DIGITAL_DOWN);
+Piston clamp('H', false, pros::E_CONTROLLER_DIGITAL_B);
+Piston left_doinker('F',false, pros::E_CONTROLLER_DIGITAL_LEFT);
+Piston right_doinker('E',false, pros::E_CONTROLLER_DIGITAL_RIGHT);
+Piston redirect('G',true, pros::E_CONTROLLER_DIGITAL_L2);
 
 Optical ringSens(0);
 Optical goalSens(0);
 
 Imu imu(0);
+
+
+// * ODOMETRY
+// measured from middle of wheels to middle of wheels
+const double TRACK_LENGTH = 11; // 11 inch track width (across )
+const double TRACK_WIDTH = 11.1875; // 11 inch track width (across intake)
+
+Rotation verticalTrackingWheel(3);
+
+
 
 
 // drivetrain settings
@@ -85,4 +95,3 @@ Chassis chassis(drivetrain,         // drivetrain settings
 // create the color sorter
 ColorSort color_sort;
 AutoClamp auto_clamp;
-OverclockMech oc_mech;

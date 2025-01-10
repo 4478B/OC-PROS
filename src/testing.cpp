@@ -3,7 +3,6 @@
 #include "lemlib/chassis/chassis.hpp"
 #include "lemlib/api.hpp" // IWYU pragma: keep
 #include "liblvgl/llemu.hpp"
-#include "overclock_mech.h"
 #include "pros/adi.h"
 #include "pros/misc.h"
 #include "pros/motors.h"

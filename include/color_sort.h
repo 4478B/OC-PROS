@@ -3,6 +3,13 @@
 
 #include "pros/rtos.hpp"
 
+
+// Waits until either red ring is in intake or it times out based on the timeout
+bool waitUntilRedIntake(int timeout);
+// Waits until either blue ring is in intake or it times out based on the timeout
+bool waitUntilBlueIntake(int timeout);
+// Waits until either any ring is in intake or it times out based on the timeout
+bool waitUntilAnyIntake(int timeout);
 /**
  * @class Hue
  * @brief A class to represent and manipulate hue values.
