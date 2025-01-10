@@ -6,7 +6,7 @@ Controller controller(pros::E_CONTROLLER_MASTER);
 
 // motor definitions
 // goes front to back
-MotorGroup left_motors({-6, -18, 4}, pros::MotorGearset::blue);
+MotorGroup left_motors({-6, 18, -4}, pros::MotorGearset::blue);
 MotorGroup right_motors({2, -9, 5}, pros::MotorGearset::blue);
 MotorGroup all_motors({-2,-4,-11,3,8,9},pros::MotorGearset::blue);
 
@@ -25,7 +25,7 @@ Piston redirect('G',true, pros::E_CONTROLLER_DIGITAL_L2);
 Optical ringSens(0);
 Optical goalSens(0);
 
-Imu imu(0);
+Imu imu(8);
 
 
 // * ODOMETRY

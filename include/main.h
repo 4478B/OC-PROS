@@ -65,6 +65,8 @@ extern "C" {
 #define NONE -1
 #define IDLE_LOW 2
 
+extern int ocMove;
+
 void setArm(int position);
 void setArmBottom();
 void setArmMid();

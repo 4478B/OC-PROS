@@ -306,17 +306,17 @@ void ringRush(int mode){
             chassis.setPose(0, 0, 221);
 
             // arm functions
-            setArmAlliance();
+            //setArmAlliance();
             delay(1000);
             drivePID(-6);
-            setArmTop();
+            //setArmTop();
             endSection(700);
 
             // move to alliance ring and score it
             chassis.turnToHeading(159, 1000, {}, false);
             intake.move(80);
             drivePID(27, 1000, 45);
-            setArmBottom();
+            //setArmBottom();
             delay(150);
             intake.move(20);
             // chassis.turnToHeading(180 ,1000,{},false);
@@ -345,7 +345,7 @@ void ringRush(int mode){
 
             // go to middle
             chassis.turnToHeading(165, 1000, {}, false);
-            setArmMid();
+            //setArmMid();
             left_motors.move(42);
             right_motors.move(42);
             delay(5000);
@@ -359,17 +359,17 @@ void ringRush(int mode){
             chassis.setPose(0, 0, -221);
 
             // arm functions
-            setArmAlliance();
+            //setArmAlliance();
             delay(1000);
             drivePID(-6);
-            setArmTop();
+            //setArmTop();
             endSection(700);
 
             // move to alliance ring and score it
             chassis.turnToHeading(-159, 1000, {}, false);
             intake.move(80);
             drivePID(27, 1000, 45);
-            setArmBottom();
+            //setArmBottom();
             delay(150);
             intake.move(20);
             // chassis.turnToHeading(180 ,1000,{},false);
@@ -398,7 +398,7 @@ void ringRush(int mode){
 
             // go to middle
             chassis.turnToHeading(-165, 1000, {}, false);
-            setArmMid();
+            //setArmMid();
             left_motors.move(42);
             right_motors.move(42);
             delay(5000);
