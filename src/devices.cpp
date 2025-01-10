@@ -7,13 +7,13 @@ Controller controller(pros::E_CONTROLLER_MASTER);
 
 // motor definitions
 MotorGroup left_motors({-2, -4, 11}, pros::MotorGearset::blue);
-MotorGroup right_motors({3, -8, 10}, pros::MotorGearset::blue);
+MotorGroup right_motors({3, -8, 0}, pros::MotorGearset::blue);
 MotorGroup all_motors({-2,-4,-11,3,8,9},pros::MotorGearset::blue);
 
 Motor intake(1, pros::MotorGearset::blue);
-Motor oc_motor(9, pros::MotorGearset::green);
+Motor oc_motor(10, pros::MotorGearset::green);
 
-Rotation ocRot(12);
+Rotation ocRot(19);
 PID ocPID(.7, 0, .4);
 
 Piston oc_piston('A',false, pros::E_CONTROLLER_DIGITAL_L2);

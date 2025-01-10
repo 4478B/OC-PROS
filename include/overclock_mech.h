@@ -160,6 +160,7 @@ private:
  * @brief The control task for the overclock mechanism.
  * @param param The task parameter.
  */
-void oc_control_task(void *param);
+void oc_control_task(void* param);
+void oc_screen_task(void* param);
 
 #endif // OVERCLOCK_MECH_H

@@ -2,6 +2,7 @@
 #include "lemlib/api.hpp" // IWYU pragma: keep
 #include "lemlib/pid.hpp"
 #include "liblvgl/llemu.hpp"
+#include "overclock_mech.h"
 #include "pros/adi.h"
 #include "pros/misc.h"
 #include "pros/motors.h"
@@ -28,6 +29,8 @@ void initialize()
 
     // Create a task for controlling the oc motor
     Task oc_task(oc_control_task, nullptr, "oc Control Task");
+    Task oc_screen(oc_screen_task, nullptr, "oc Screen Task");
+    
 
     pros::lcd::set_text_align(pros::lcd::Text_Align::CENTER); // Set the text alignment to center on the LCD screen
 
@@ -132,12 +135,13 @@ void handleIntake(pros::controller_digital_e_t buttonUp, pros::controller_digita
     }
     
 }
-
+bool returnOC = false;
 void handleOCMotor(pros::controller_digital_e_t button) {
     if (controller.get_digital(button)) {
-        overclock_mech.setTargetPos(OCMovement::HIGH_POS, true);
-    } else if (overclock_mech.getReturnLowAfterMove() && !overclock_mech.getIsActive()) {
-        overclock_mech.setTargetPos(OCMovement::LOW_POS, false);
+        overclock_mech.setTargetPos(OCMovement::HIGH_POS);
+        returnOC = true;
+    } else if (returnOC) {
+        overclock_mech.setTargetPos(OCMovement::LOW_POS);
     }
 }
 
