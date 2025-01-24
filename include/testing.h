@@ -6,6 +6,7 @@ void testGoalSens(int i);
 void testOdometryStraight(int i);
 void testOdometryTurn(int i);
 void testOdometryBoth(int i);
+void motor_temp_task(void* param);
 void testAuton(bool inp = true);
 void testRandom();
 extern int totalTime;

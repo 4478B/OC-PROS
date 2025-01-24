@@ -6,21 +6,21 @@ Controller controller(pros::E_CONTROLLER_MASTER);
 
 // motor definitions
 // goes front to back
-MotorGroup left_motors({4, 11, 2}, pros::MotorGearset::blue);
-MotorGroup right_motors({3, 12, 7}, pros::MotorGearset::blue);
+MotorGroup left_motors({-4, 11, -2}, pros::MotorGearset::blue);
+MotorGroup right_motors({3,-12, 7}, pros::MotorGearset::blue);
 MotorGroup all_motors({},pros::MotorGearset::blue);
 
-Motor intake(1, pros::MotorGearset::blue);
+Motor intake(-1, pros::MotorGearset::blue);
 Motor oc_motor(10, pros::MotorGearset::green);
 
 Rotation ocRot(5);
 PID ocPID(.7, 0, .4);
 
-Piston oc_piston('C',false, pros::E_CONTROLLER_DIGITAL_DOWN);
-Piston clamp('H', false, pros::E_CONTROLLER_DIGITAL_B);
-Piston left_doinker('F',false, pros::E_CONTROLLER_DIGITAL_LEFT);
-Piston right_doinker('E',false, pros::E_CONTROLLER_DIGITAL_RIGHT);
-Piston redirect('G',true, pros::E_CONTROLLER_DIGITAL_L2);
+Piston oc_piston('E',false, pros::E_CONTROLLER_DIGITAL_DOWN);
+Piston clamp('G', false, pros::E_CONTROLLER_DIGITAL_B);
+Piston left_doinker('D',false, pros::E_CONTROLLER_DIGITAL_LEFT);
+Piston right_doinker('F',false, pros::E_CONTROLLER_DIGITAL_RIGHT);
+Piston redirect('H',true, pros::E_CONTROLLER_DIGITAL_L2);
 
 Optical ringSens(0);
 Optical goalSens(0);

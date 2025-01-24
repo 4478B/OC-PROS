@@ -5,6 +5,7 @@
 #include "liblvgl/llemu.hpp"
 #include "pros/adi.h"
 #include "pros/misc.h"
+#include "pros/misc.hpp"
 #include "pros/motors.h"
 #include <cstdlib>
 #include "devices.h"
@@ -174,6 +175,61 @@ void testGoalSens(int i)
         endSection(1000000);
     }
 }
+
+void motor_temp_task(void* param){
+
+    int lastTorqueTimestamp = pros::millis();
+    int torqueTimeout = 2000;
+    int lastTorque = (int)intake.get_torque();
+    while(true){
+        pros::delay(200);
+
+        // Array of motor names
+        const char* motorNames[] = {"LM1", "LM2", "LM3", "RM1", "RM2", "RM3", "INT"};
+        // Array of motor temps
+        double motorTemps[] = {
+            left_motors.get_temperature(0), 
+            left_motors.get_temperature(1), 
+            left_motors.get_temperature(2), 
+            right_motors.get_temperature(0), 
+            right_motors.get_temperature(1), 
+            right_motors.get_temperature(2), 
+            intake.get_temperature()
+        };
+        // Array of motor efficiencies
+        double motorEfficiencies[] = {
+            left_motors.get_efficiency(0), 
+            left_motors.get_efficiency(1), 
+            left_motors.get_efficiency(2), 
+            right_motors.get_efficiency(0), 
+            right_motors.get_efficiency(1), 
+            right_motors.get_efficiency(2), 
+            intake.get_efficiency()
+        };
+
+        // Print motor names and temperatures
+        pros::lcd::print(1, "NAME: %s %s %s %s %s %s %s", motorNames[0], motorNames[1], motorNames[2], motorNames[3], motorNames[4], motorNames[5], motorNames[6]);
+        pros::lcd::print(2, "TEMP: %d  %d  %d  %d  %d  %d  %d", (int)motorTemps[0], (int)motorTemps[1], (int)motorTemps[2], (int)motorTemps[3], (int)motorTemps[4], (int)motorTemps[5], (int)motorTemps[6]);
+        //pros::lcd::print(3, "EFF%: %d  %d  %d  %d  %d  %d  %d", (int)motorEfficiencies[0], (int)motorEfficiencies[1], (int)motorEfficiencies[2], (int)motorEfficiencies[3], (int)motorEfficiencies[4], (int)motorEfficiencies[5], (int)motorEfficiencies[6]);
+        pros::lcd::print(3,"EFF: %f", left_motors.get_efficiency(0));
+        // Print Meaning
+        pros::lcd::print(4, "T>50=Overheating - ^EFF=GOOD");
+
+        // Print battery percentage
+        pros::lcd::print(5, "Battery: %.2f%%", pros::battery::get_capacity());
+
+        // Print max intake torque in last X time
+        if(pros::millis() - lastTorqueTimestamp > torqueTimeout || intake.get_torque() > lastTorque){
+            lastTorque = (int)intake.get_torque();
+            lastTorqueTimestamp = pros::millis();
+        }
+        pros::lcd::print(6, "Max Torque in last %dms: %d", torqueTimeout, lastTorque);
+        
+
+    }
+}
+
+
 
 /*
 

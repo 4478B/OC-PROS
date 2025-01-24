@@ -5,6 +5,7 @@
 #include "liblvgl/llemu.hpp"
 #include "pros/adi.h"
 #include "pros/misc.h"
+#include "pros/misc.hpp"
 #include "pros/motors.h"
 #include "pros/rotation.hpp"
 #include <cstdlib>
@@ -99,13 +100,13 @@ void oc_control_task(void* param)
         }*/
         
         
-        pros::lcd::print(6, "oc State: %s", ocMove != NONE ? ocMove == HIGH ? 
-                                                           "HIGH" : "LOW" : "NONE");
-        pros::lcd::print(3, "oc Current Pos: %f", (double) currentPos);
-        pros::lcd::print(4, "oc Target Pos: %f", ocMove != NONE ? ocMove == HIGH ? 
-                                                           OC_POSITION_HIGH : OC_POSITION_LOW : -1);
-        pros::lcd::print(7, "error: %f", error);
-        pros::lcd::print(5, "oc Next Movement: %f", nextMovement);
+        //pros::lcd::print(6, "oc State: %s", ocMove != NONE ? ocMove == HIGH ? 
+        //                                                   "HIGH" : "LOW" : "NONE");
+        //pros::lcd::print(3, "oc Current Pos: %f", (double) currentPos);
+        //pros::lcd::print(4, "oc Target Pos: %f", ocMove != NONE ? ocMove == HIGH ? 
+        //                                                  OC_POSITION_HIGH : OC_POSITION_LOW : -1);
+        //pros::lcd::print(7, "error: %f", error);
+        //pros::lcd::print(5, "oc Next Movement: %f", nextMovement);
         
         pros::delay(20);
         
@@ -128,8 +129,10 @@ void initialize()
 
     // Create a task for controlling the oc motor
     Task oc_task(oc_control_task, nullptr, "oc Control Task");
-    
-
+    // Create a task for outputting motor temps
+    if(!competition::is_connected()){
+        Task temp_task(motor_temp_task, nullptr, "Motor Temp Task");
+    }
     pros::lcd::set_text_align(pros::lcd::Text_Align::CENTER); // Set the text alignment to center on the LCD screen
 
 }
