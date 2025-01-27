@@ -28,10 +28,12 @@ void drivePID(double inches, int timeout, double kP, double kI, double kD, doubl
   double previousDelta = target; // Initialize previous error as target
   double integralSum = 0;        // Cumulative error for integral term
 
-  // make sure clamp is up if clamping
-  if(clamping && clamp.is_extended()){
-    clamp.retract();
-  }
+  /*// make sure clamp is up if clamping
+  double clampState = clamp.get_value();
+  if(clamping && clampState == LOW){
+    clamp.set_value(HIGH);
+    clampState = HIGH;
+  }*/
 
   double startTime = pros::millis();                                // max time before PID times out
   double goalsNeeded = (fabs(inches) / 5) * pollingRate; // makes time spent in goal proportional to distance
@@ -90,9 +92,9 @@ void drivePID(double inches, int timeout, double kP, double kI, double kD, doubl
     }
     
     // Check if should clamp
-    if (clamping && !clamp.is_extended() && fabs(currentDelta) < CLAMP_DISTANCE){
+    if (clamping && clamp.is_extended() && fabs(currentDelta) < CLAMP_DISTANCE){
 
-      clamp.extend();
+      clamp.set_value(LOW);
 
     }
 

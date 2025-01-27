@@ -8,9 +8,9 @@ Controller controller(pros::E_CONTROLLER_MASTER);
 // goes front to back
 MotorGroup left_motors({-4, 11, -2}, pros::MotorGearset::blue);
 MotorGroup right_motors({3,-12, 7}, pros::MotorGearset::blue);
-MotorGroup all_motors({},pros::MotorGearset::blue);
+MotorGroup all_motors({-4,11,-2,3,-12,7},pros::MotorGearset::blue);
 
-Motor intake(-1, pros::MotorGearset::blue);
+Motor intake(1, pros::MotorGearset::blue);
 Motor oc_motor(10, pros::MotorGearset::green);
 
 Rotation ocRot(5);

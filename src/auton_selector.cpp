@@ -94,8 +94,10 @@ int AutonSelector::getRoutineCount() const {
 // Global object definitions
 const AutonRoutine COMPETITION_ROUTINES[] = {
     {"Prog Skills", progSkills},
-    {"Safe AWP Left", LocalFullAWP, -1},
-    {"Safe AWP Right", LocalFullAWP, 1},
+    {"Safe AWP Left", safeAWP, -1},
+    {"Safe AWP Right", safeAWP, 1},
+    {"Blue Goalside Sugar Rush", blueGoalSideSugarRush, 1},
+    {"Red Goalside Sugar Rush", redGoalSideSugarRush, 1}
     /*{"Ring Rush Alliance", ringRush, 1},
     {"Ring Rush Touch Mid", ringRush, 2},
     {"Ring Rush Face Corner", ringRush, 3},

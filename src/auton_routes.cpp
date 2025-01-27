@@ -8,6 +8,7 @@
 #include "pros/misc.h"
 #include <cstdlib>
 #include "devices.h"
+#include "pros/motors.h"
 #include "testing.h"
 #include <iomanip>
 #include "color_sort.h"
@@ -71,7 +72,88 @@ void endSection(int delay)
 bool isRedTeam = competitionSelector.isRedTeam;
 
 void progSkills(){
+    chassis.setPose(-58, 0, 270);
+    oc_motor.move(127);
+    delay(500);
+    oc_motor.move(-127);
+    delay(100);
+    clamp.set_value(LOW);
+    drivePID(-9, 1000);
+    oc_motor.brake();
+    // endSection(50000);
+    delay(300);
+    chassis.turnToHeading(358, 2000);
+    drivePID(-22,1000,30);
+    drivePID(-16, 1000, 30);
+    clamp.set_value(HIGH);
+    delay(150);
+    chassis.turnToHeading(90, 2000);
+    intake.move(127);
+    drivePID(25);
+    delay(300);
+    chassis.turnToHeading(125, 2000);
+    drivePID(30);
+    endSection(500);
+    chassis.turnToHeading(180, 2000);
+    drivePID(16);
+    delay(3000);
+    endSection(500);
+    drivePID(-9);
+    chassis.turnToHeading(270, 2000);
+    drivePID(64, 6000, 10);
+    delay(500);
+    drivePID(-13);
+    chassis.turnToHeading(180, 2000);
+    drivePID(16,3000,30);
+    delay(150);
+    drivePID(-16);
+    chassis.turnToHeading(45, 2000);
+    drivePID(-21,3000,25);
+    intake.move(-90);
+    clamp.set_value(LOW);
+    endSection(1000);
+    drivePID(19);
+    intake.move(127);
+    chassis.turnToHeading(180, 2000);
     
+    drivePID(-55,5000,35);
+
+    chassis.turnToHeading(180,2000);
+
+    drivePID(-22);
+    drivePID(-10, 1000, 35);
+    clamp.set_value(HIGH);
+    delay(150);
+    endSection(50000);
+    drivePID(5, 600);
+    endSection(500);
+    chassis.turnToHeading(90, 2000);
+    intake.move(127);
+    drivePID(25);
+    delay(300);
+    chassis.turnToHeading(55, 2000);
+    drivePID(30);
+    endSection(500);
+    chassis.turnToHeading(0, 2000);
+    drivePID(18);
+    delay(3000);
+    endSection(500);
+    drivePID(-10);
+    chassis.turnToHeading(274, 2000);
+    drivePID(64, 6000, 10);
+    delay(500);
+    drivePID(-13);
+    chassis.turnToHeading(0, 2000);
+    drivePID(16,3000,30);
+    delay(150);
+    drivePID(-16);
+    chassis.turnToHeading(135, 2000);
+    drivePID(-23,3000,25);
+    intake.move(-90);
+    clamp.set_value(LOW);
+    endSection(1000);
+    drivePID(25);
+    intake.move(127);
 }
 
 
@@ -200,104 +282,107 @@ void ringRush(int mode){
     }
 }
 
-    void redGoalSideSugarRush(int i)
-    {
-        clamp.set_value(HIGH);
-        right_doinker.set_value(HIGH);
-        chassis.setPose(0, 0, 90);
-        drivePID(40, 1000, 70);
-        endSection();
+void redGoalSideSugarRush(int i)
+{
+    clamp.set_value(LOW);
+    right_doinker.set_value(HIGH);
+    chassis.setPose(0, 0, 90);
+    drivePID(40, 1000, 70);
+    endSection();
 
-        chassis.turnToHeading(275, 1000, {}, false);
-        right_doinker.set_value(LOW);
-        endSection();
+    chassis.turnToHeading(275, 1000, {}, false);
+    right_doinker.set_value(LOW);
+    endSection();
 
-        chassis.turnToHeading(320, 1000);
-        intake.move(127);
-        drivePID(15);
-        delay(270);
-        intake.brake();
-        drivePID(8);
-        endSection(100);
+    chassis.turnToHeading(320, 1000);
+    intake.move(127);
+    drivePID(15);
+    delay(270);
+    intake.brake();
+    //drivePID(8);
+    endSection(100);
 
-        chassis.turnToHeading(180, 1000, {}, false);
-        drivePID(-24);
-        clamp.set_value(LOW);
-        endSection(500);
+    chassis.turnToHeading(180, 1000, {}, false);
+    drivePID(-27,1000,30);
+    clamp.set_value(HIGH);
+    endSection(500);
 
-        chassis.turnToHeading(270, 1000, {}, false);
-        intake.move(127);
-        drivePID(35, 1000);
-        endSection();
+    chassis.turnToHeading(270, 1000, {}, false);
+    intake.move(127);
+    drivePID(35, 1000);
+    endSection();
 
-        chassis.turnToHeading(190, 1000, {}, false);
-        right_doinker.set_value(HIGH);
-        drivePID(36, 1000);
-        endSection();
+    chassis.turnToHeading(190, 1000, {}, false);
+    right_doinker.set_value(HIGH);
+    drivePID(34, 1000);
+    endSection();
 
-        chassis.turnToHeading(90, 1000, {}, false);
-        endSection();
+    chassis.turnToHeading(90, 1000, {}, false);
+    endSection();
 
-        intake.brake();
-        drivePID(20, 1000);
-        clamp.set_value(HIGH);
-        endSection();
+    intake.brake();
+    drivePID(20, 1000);
+    clamp.set_value(LOW);
+    endSection();
 
-        right_doinker.set_value(LOW);
-        chassis.turnToHeading(225, 1000, {}, false);
-        endSection();
+    right_doinker.set_value(LOW);
+    chassis.turnToHeading(225, 1000, {}, false);
+    endSection();
 
-        drivePID(-24, 1000, 80);
-    }
-    void blueGoalSideSugarRush(int i)
-    {
-        clamp.set_value(HIGH);
-        right_doinker.set_value(HIGH);
-        chassis.setPose(0, 0, -90);
-        drivePID(40, 1000, 70);
-        endSection();
+    drivePID(-24, 1000, 80);
+    chassis.turnToHeading(270, 1000);
+}
+void blueGoalSideSugarRush(int i)
+{
+    clamp.set_value(LOW);
+    left_doinker.set_value(HIGH);
+    chassis.setPose(0, 0, -90);
+    drivePID(40, 1000, 70);
+    endSection();
 
-        chassis.turnToHeading(-275, 1000, {}, false);
-        right_doinker.set_value(LOW);
-        endSection();
+    chassis.turnToHeading(-275, 1000, {}, false);
+    left_doinker.set_value(LOW);
+    endSection();
 
-        chassis.turnToHeading(-320, 1000);
-        intake.move(127);
-        drivePID(15);
-        delay(270);
-        intake.brake();
-        drivePID(8);
-        endSection(100);
+    chassis.turnToHeading(-320, 1000);
+    intake.move(127);
+    drivePID(15);
+    delay(270);
+    intake.brake();
+    //drivePID(8);
+    endSection(100);
 
-        chassis.turnToHeading(-180, 1000, {}, false);
-        drivePID(-24);
-        clamp.set_value(LOW);
-        endSection(500);
+    chassis.turnToHeading(-180, 1000, {}, false);
+    drivePID(-27,1000,30);
+    clamp.set_value(HIGH);
+    endSection(500);
 
-        chassis.turnToHeading(-270, 1000, {}, false);
-        intake.move(127);
-        drivePID(35, 1000);
-        endSection();
+    chassis.turnToHeading(-270, 1000, {}, false);
+    intake.move(127);
+    drivePID(35, 1000);
+    endSection();
 
-        chassis.turnToHeading(-190, 1000, {}, false);
-        right_doinker.set_value(HIGH);
-        drivePID(36, 1000);
-        endSection();
+    chassis.turnToHeading(-190, 1000, {}, false);
+    left_doinker.set_value(HIGH);
+    drivePID(34, 1000);
+    endSection();
 
-        chassis.turnToHeading(-90, 1000, {}, false);
-        endSection();
+    chassis.turnToHeading(-90, 1000, {}, false);
+    endSection();
 
-        intake.brake();
-        drivePID(20, 1000);
-        clamp.set_value(HIGH);
-        endSection();
+    intake.brake();
+    drivePID(20, 1000);
+    clamp.set_value(LOW);
+    endSection();
 
-        right_doinker.set_value(LOW);
-        chassis.turnToHeading(-225, 1000, {}, false);
-        endSection();
+    left_doinker.set_value(LOW);
+    chassis.turnToHeading(-225, 1000, {}, false);
+    endSection();
 
-        drivePID(-24, 1000, 80);
-    }
+    drivePID(-24, 1000, 80);
+    chassis.turnToHeading(-270, 1000);
+}
+
     void LocalFullAWP(int i)
     {
         if(i==1){
@@ -408,13 +493,81 @@ void ringRush(int mode){
        
     }
 void safeAWP(int mode){
-    if(mode == 1){
+    if(mode == -1){
         // * LEFT SIDE
+        // todo: fix the brake types
+        all_motors.set_brake_mode_all(E_MOTOR_BRAKE_HOLD);
 
+        // push middle ring
+        intake.move(-127);
+        chassis.setPose(0, 0, 0);
+        drivePID(12,800);
+        
+        // face and score ring on alliance stake
+        chassis.turnToHeading(90, 1000, {}, false);
+        drivePID(2,500);
+        oc_motor.move(127);
+        delay(500);
+        oc_motor.move(-127);
+        delay(100);
+        drivePID(-12,800);
+        oc_motor.brake();
+        // todo: fix the brake types
+        all_motors.set_brake_mode_all(E_MOTOR_BRAKE_COAST);
+        drivePID(3,500);
+
+        // turn and clamp
+        chassis.turnToHeading(42, 1000, {}, false);
+        drivePID(-40,3000,30);
+        clamp.extend();
+
+        // turn and score ring on mogo
+        chassis.turnToHeading(180, 1000, {}, false);
+        intake.move(127);
+        drivePID(30,2000,30);
+
+        // turn to mid and touch
+        chassis.turnToHeading(-10, 1000, {}, false);
+        oc_piston.extend();
+        drivePID(50,2000,30);
     }
     else{
         // * RIGHT SIDE
+        // todo: fix the brake types
+        all_motors.set_brake_mode_all(E_MOTOR_BRAKE_HOLD);
 
+        // push middle ring
+        intake.move(-127);
+        chassis.setPose(0, 0, 0);
+        drivePID(12,800);
+        
+        // face and score ring on alliance stake
+        chassis.turnToHeading(-90, 1000, {}, false);
+        drivePID(2,500);
+        oc_motor.move(127);
+        delay(500);
+        oc_motor.move(-127);
+        delay(100);
+        drivePID(-12,800);
+        oc_motor.brake();
+        // todo: fix the brake types
+        all_motors.set_brake_mode_all(E_MOTOR_BRAKE_COAST);
+        drivePID(3,500);
+
+        // turn and clamp
+        chassis.turnToHeading(-42, 1000, {}, false);
+        drivePID(-40,3000,30);
+        clamp.extend();
+
+        // turn and score ring on mogo
+        chassis.turnToHeading(-180, 1000, {}, false);
+        intake.move(127);
+        drivePID(30,2000,30);
+
+        // turn to mid and touch
+        chassis.turnToHeading(-10, 1000, {}, false);
+        oc_piston.extend();
+        drivePID(50,2000,30);
     }
 }
 

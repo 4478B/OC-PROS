@@ -1,4 +1,5 @@
 #include "main.h"
+#include "auton_routes.h"
 #include "lemlib/api.hpp" // IWYU pragma: keep
 #include "lemlib/chassis/chassis.hpp"
 #include "lemlib/pid.hpp"
@@ -12,6 +13,7 @@
 #include "devices.h"
 #include "auton_selector.h"
 #include "testing.h"
+#include "old_systems.h"
 
 // Global variables needed for oc control
 int ocMove = NONE;
@@ -23,7 +25,7 @@ const double OC_MAX_TORQUE = 999;
 
 // Task function for oc control
 // NOTE: as arm moves up, angle decreases!!
-void oc_control_task(void* param)
+/*void oc_control_task(void* param)
 {
     double currentPos;
     double error;
@@ -97,7 +99,7 @@ void oc_control_task(void* param)
         }
         // in case there is drift
         /*else if(ocMove == IDLE_LOW){
-        }*/
+        }
         
         
         //pros::lcd::print(6, "oc State: %s", ocMove != NONE ? ocMove == HIGH ? 
@@ -112,6 +114,7 @@ void oc_control_task(void* param)
         
     }
 }
+*/
 // initialize function. Runs on program startup
 void initialize()
 {
@@ -128,7 +131,7 @@ void initialize()
     oc_motor.set_brake_mode_all(E_MOTOR_BRAKE_COAST); // Set all motors to coast mode
 
     // Create a task for controlling the oc motor
-    Task oc_task(oc_control_task, nullptr, "oc Control Task");
+    //Task oc_task(oc_control_task, nullptr, "oc Control Task");
     // Create a task for outputting motor temps
     if(!competition::is_connected()){
         Task temp_task(motor_temp_task, nullptr, "Motor Temp Task");
@@ -139,11 +142,12 @@ void initialize()
 
 void autonomous()
 {
-    all_motors.set_brake_mode_all(E_MOTOR_BRAKE_HOLD);
-    competitionSelector.runSelection();
-    all_motors.brake();
-    delay(2000);
-    all_motors.set_brake_mode_all(E_MOTOR_BRAKE_COAST);
+        all_motors.set_brake_mode_all(E_MOTOR_BRAKE_HOLD);
+        competitionSelector.runSelection();
+        all_motors.brake();
+        oc_motor.brake();
+        delay(1000);
+        all_motors.set_brake_mode_all(E_MOTOR_BRAKE_COAST);
 }
 
 /**
@@ -237,10 +241,10 @@ void handleIntake(pros::controller_digital_e_t buttonUp, pros::controller_digita
     
 }
 bool returnOC = false; // if oc still needs to return
-
+double ocAngle;
 void handleOCMotor(pros::controller_digital_e_t button)
 {
-    if (controller.get_digital(button))
+    /*if (controller.get_digital(button))
     {
         ocMove = HIGH;
         returnOC = true;
@@ -248,6 +252,25 @@ void handleOCMotor(pros::controller_digital_e_t button)
     else if(returnOC){
         ocMove = LOW;
         returnOC = false;
+    }*/
+    if (controller.get_digital(button))
+    {
+        oc_motor.move(127);
+    }
+    else{
+        ocAngle = ocRot.get_angle()/100.0;
+        if(ocAngle>330||ocAngle<10){
+            oc_motor.set_brake_mode(E_MOTOR_BRAKE_COAST);
+            //if(oc_motor.get_temperature() < 45){
+            //    oc_motor.move(-9);
+            //}
+            //else{
+                oc_motor.brake();
+            //}
+        }
+        else{
+            oc_motor.move(-127);
+        }
     }
 }
 
@@ -275,7 +298,7 @@ void opcontrol()
         if (!inCompetition) { testAuton(); }
 
         handleDriveTrain();
-        handleIntake(pros::E_CONTROLLER_DIGITAL_R2,pros::E_CONTROLLER_DIGITAL_R1);
+        handleIntake(pros::E_CONTROLLER_DIGITAL_R1,pros::E_CONTROLLER_DIGITAL_R2);
         handleOCMotor(pros::E_CONTROLLER_DIGITAL_L1);
         
         oc_piston.handle();

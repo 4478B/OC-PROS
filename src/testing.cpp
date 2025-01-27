@@ -211,9 +211,9 @@ void motor_temp_task(void* param){
         pros::lcd::print(1, "NAME: %s %s %s %s %s %s %s", motorNames[0], motorNames[1], motorNames[2], motorNames[3], motorNames[4], motorNames[5], motorNames[6]);
         pros::lcd::print(2, "TEMP: %d  %d  %d  %d  %d  %d  %d", (int)motorTemps[0], (int)motorTemps[1], (int)motorTemps[2], (int)motorTemps[3], (int)motorTemps[4], (int)motorTemps[5], (int)motorTemps[6]);
         //pros::lcd::print(3, "EFF%: %d  %d  %d  %d  %d  %d  %d", (int)motorEfficiencies[0], (int)motorEfficiencies[1], (int)motorEfficiencies[2], (int)motorEfficiencies[3], (int)motorEfficiencies[4], (int)motorEfficiencies[5], (int)motorEfficiencies[6]);
-        pros::lcd::print(3,"EFF: %f", left_motors.get_efficiency(0));
+        //pros::lcd::print(3,"EFF: %f", left_motors.get_efficiency(0));
         // Print Meaning
-        pros::lcd::print(4, "T>50=Overheating - ^EFF=GOOD");
+        pros::lcd::print(4, "Temp >= 55 is Overheating");
 
         // Print battery percentage
         pros::lcd::print(5, "Battery: %.2f%%", pros::battery::get_capacity());
@@ -223,7 +223,7 @@ void motor_temp_task(void* param){
             lastTorque = (int)intake.get_torque();
             lastTorqueTimestamp = pros::millis();
         }
-        pros::lcd::print(6, "Max Torque in last %dms: %d", torqueTimeout, lastTorque);
+        pros::lcd::print(6, "Max Torque in last 2000ms: %d", torqueTimeout, lastTorque);
         
 
     }
@@ -281,7 +281,7 @@ void testAuton(bool inputReq)
                   << std::endl;
 
         // THIS IS WHERE YOU CHANGE THE ROUTE YOU'RE TESTING
-        progSkills();
+        redGoalSideSugarRush(1);
 
         // stops motors to prevent rogue movements after auton
         left_motors.brake();
