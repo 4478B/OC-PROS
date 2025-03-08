@@ -255,11 +255,11 @@ void handleOCMotor(pros::controller_digital_e_t button)
     }*/
     if (controller.get_digital(button))
     {
-        oc_motor.move(127);
+        oc_motor.move(-127);
     }
     else{
         ocAngle = ocRot.get_angle()/100.0;
-        if(ocAngle>330||ocAngle<10){
+        if(ocAngle>330||ocAngle<20){
             oc_motor.set_brake_mode(E_MOTOR_BRAKE_COAST);
             //if(oc_motor.get_temperature() < 45){
             //    oc_motor.move(-9);
@@ -269,7 +269,9 @@ void handleOCMotor(pros::controller_digital_e_t button)
             //}
         }
         else{
-            oc_motor.move(-127);
+            oc_motor.move(127);
+            delay(1000);
+            oc_motor.brake();
         }
     }
 }
